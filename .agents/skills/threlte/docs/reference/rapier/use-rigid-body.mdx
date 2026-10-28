@@ -1,0 +1,35 @@
+---
+order: 10
+category: '@threlte/rapier'
+sourcePath: 'packages/rapier/src/lib/hooks/useRigidBody.ts'
+title: 'useRigidBody'
+type: 'hook'
+---
+
+This hook provides access to the `RAPIER.RigidBody` from a parent [`<RigidBody>`](/docs/reference/rapier/rigid-body) component.
+
+Use this hook to e.g. add custom colliders to a `RAPIER.RigidBody` defined by a parent `<RigidBody>` component.
+
+```svelte
+<script>
+  import { useRapier, useRigidBody } from '@threlte/rapier'
+
+  const { world } = useRapier()
+
+  const rigidBody = useRigidBody()
+
+  $effect(() => {
+    const collider = world.createCollider(colliderDesc, rigidBody.current)
+
+    return () => {
+      world.removeCollider(collider, true)
+    }
+  })
+</script>
+```
+
+### Types
+
+```ts
+const rigidBody = useRigidBody() // { current: RAPIER.RigidBody | undefined }
+```

@@ -1,0 +1,50 @@
+---
+order: 13
+category: '@threlte/rapier'
+sourcePath: 'packages/rapier/src/lib/hooks/useFixedJoint.ts'
+title: 'useFixedJoint'
+type: 'hook'
+---
+
+Use this hook to initialize a [`FixedImpulseJoint`](https://rapier.rs/docs/user_guides/javascript/joints#fixed-joint).
+
+A fixed joint welds two rigid bodies together, locking their relative position and orientation so they behave as a single rigid unit. Reach for it when you need a composite from separate bodies — parts you may want to detach at runtime, or parts with different mass, friction, or collision properties.
+
+<Example path="rapier/joints/fixed/basic" />
+
+```svelte
+<script>
+  import { useFixedJoint, RigidBody, Collider } from '@threlte/rapier'
+
+  const { joint, rigidBodyA, rigidBodyB } = useFixedJoint({ x: 1 }, {}, { x: -1 }, {})
+</script>
+
+<RigidBody bind:rigidBody={$rigidBodyA}>
+  <Collider
+    shape="cuboid"
+    args={[1, 1, 1]}
+  />
+</RigidBody>
+
+<RigidBody bind:rigidBody={$rigidBodyB}>
+  <Collider
+    shape="cuboid"
+    args={[1, 1, 1]}
+  />
+</RigidBody>
+```
+
+### Signature
+
+```ts
+const {
+	joint: Writable<FixedImpulseJoint>
+	rigidBodyA: Writable<RAPIER.RigidBody>
+	rigidBodyB: Writable<RAPIER.RigidBody>
+} = useFixedJoint(
+	anchorA,  // [number, number, number]
+  frameA,   // [number, number, number] | Euler
+  anchorB,  // [number, number, number]
+  frameB    // [number, number, number] | Euler
+)
+```

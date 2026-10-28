@@ -1,0 +1,64 @@
+---
+category: Advanced
+title: TSL
+order: 1.5
+---
+
+A question that comes up often in Three.js development is "How do I extend materials?". External libraries such as
+[three-custom-shader-material](https://www.npmjs.com/package/three-custom-shader-material)
+use a find and replace solution to get this job done. Three.js has identified
+that it's not an ideal solution and recommends using the [Three.js Shading
+Language](https://github.com/mrdoob/three.js/wiki/Three.js-Shading-Language) or
+TSL for short.
+
+TSL is written against node materials, which Threlte reaches through the
+`webgpu` export of `@threlte/core` — see
+[WebGPU](/docs/reference/core/webgpu) for setting that up.
+
+The example below is an adaptation of
+[this](https://threejs.org/examples/?q=tsl#webgpu_tsl_angular_slicing) Three.js
+example. There are many more [TSL
+examples](https://threejs.org/examples/?q=tsl) that you can use
+or adapt for your project.
+
+<Example path="shaders/webgpu/slice" />
+
+## Nodes
+
+The material's
+[nodes](https://github.com/mrdoob/three.js/wiki/Three.js-Shading-Language#nodematerial)
+can be directly assigned like any other prop on the `<T>` component.
+
+```svelte
+<T.MeshPhysicalNodeMaterial
+  {outputNode}
+  castShadowNode={Fn(() => {
+    /* ... */
+  })()}
+/>
+```
+
+Or can create the material in the script tag and use `<T>`'s `is` prop to
+attach the material.
+
+```svelte
+<script>
+  const material = new MeshPhysicalNodeMaterial()
+  material.outputNode = outputNode
+  material.castShadowNode = Fn(() => {
+    /* ... */
+  })()
+</script>
+
+<T is={material} />
+```
+
+Node materials give you the ability to modify builtin materials. In the
+sliced gear example, two nodes are modified; the `outputNode` and the
+`castShadowNode`. The `outputNode` is set up in such a way that it discards any
+fragments that are outside the permitted `startAngle` and `arcAngle`. If a
+fragment is not discarded and it is not front-facing, it is assigned the color
+in the `uColor` uniform. The material needs its `side` set to
+`THREE.DoubleSide` otherwise they will be culled if they are facing
+away from the camera. Any fragment that is discarded in the shadowNode will not
+cast shadows.

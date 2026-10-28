@@ -1,0 +1,73 @@
+---
+category: '@threlte/extras'
+group: 'Interaction'
+sourcePath: 'packages/extras/src/lib/components/controls/OrbitControls/OrbitControls.svelte'
+title: '<OrbitControls>'
+type: 'component'
+webgl: true
+webgpu: true
+componentSignature:
+  {
+    extends:
+      { type: 'OrbitControls', url: 'https://threejs.org/docs/#examples/controls/OrbitControls' },
+    props: [{ name: 'camera', type: 'THREE.Camera' }]
+  }
+---
+
+`<OrbitControls>` allow the camera to orbit around a target while ensuring a
+fixed camera up vector. If the camera orbits over the "north" or "south" poles,
+the camera experiences a "gimbal lock" that forces the scene to rotate until it
+is rightside up. This type of camera control is commonly used for showing off 3D
+models of products because it prevents them from ever appearing upside down. For
+an alternative camera controller, see
+[`<TrackballControls>`](/docs/reference/extras/trackball-controls).
+
+If placed as a child of a camera component, `<OrbitControls>` will attach to that
+camera. Otherwise, it attaches to the scene's default camera. A camera can also
+be passed explicitly via the `camera` prop.
+
+<Example
+  path="extras/orbit-controls"
+  iframe
+/>
+
+This example shows off just a few of the configurable properties of
+`<OrbitControls>`. To see all 30+ properties, consult the [Three.js
+docs](https://threejs.org/docs/#examples/en/controls/OrbitControls).
+
+## Usage
+
+```svelte
+<script>
+  import { OrbitControls } from '@threlte/extras'
+  import { T } from '@threlte/core'
+</script>
+
+<T.PerspectiveCamera
+  makeDefault
+  fov={50}
+>
+  <OrbitControls enableDamping />
+</T.PerspectiveCamera>
+```
+
+`<OrbitControls>` is a light wrapper that will use its parent as the target
+camera (or the default camera if not a child of one) and the DOM element the
+renderer is rendering to as the DOM element to listen to pointer events.
+
+## `useOrbitControls`
+
+To access the underlying `OrbitControls` instance from another component —
+without a `bind:ref` — use the `useOrbitControls` hook. It returns a reactive
+accessor whose `current` is the instance registered by the nearest
+`<OrbitControls>` within the `<Canvas>`, or `undefined` until it has mounted.
+
+```svelte title="ResetButton.svelte"
+<script lang="ts">
+  import { useOrbitControls } from '@threlte/extras'
+
+  const controls = useOrbitControls()
+</script>
+
+<button onclick={() => controls.current?.reset()}>Reset camera</button>
+```
