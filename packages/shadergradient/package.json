@@ -31,6 +31,9 @@
     "three": ">=0.150.0",
     "@react-three/fiber": ">=8.0.0"
   },
+  "dependencies": {
+    "@shadergradient/core": "workspace:^"
+  },
   "devDependencies": {
     "@chialab/esbuild-plugin-commonjs": "^0.18.0",
     "@react-spring/three": "^9.7.3",

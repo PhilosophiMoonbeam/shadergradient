@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shadergradient.com/schemas/legacy-baseline-v1.json",
+  "title": "ShaderGradient legacy compatibility evidence index",
+  "type": "object",
+  "required": ["schemaVersion", "phase", "createdAt", "provenance", "policy", "results"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "phase": { "enum": ["pre", "post"] },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "reference": { "type": ["string", "null"] },
+    "policy": { "type": "object" },
+    "provenance": {
+      "type": "object",
+      "required": ["commit", "worktree", "node", "platform", "arch", "argv", "cwd", "inputHashes", "browser", "adapters"],
+      "properties": {
+        "commit": { "type": "string" },
+        "worktree": { "type": "string" },
+        "node": { "type": "string" },
+        "platform": { "type": "string" },
+        "arch": { "type": "string" },
+        "argv": { "type": "array", "items": { "type": "string" } },
+        "cwd": { "type": "string" },
+        "inputHashes": { "type": "object", "additionalProperties": { "type": "string" } },
+        "browser": { "type": ["object", "null"] },
+        "adapters": { "type": "object" }
+      }
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "status", "reason", "artifacts"],
+        "properties": {
+          "id": { "type": "string" },
+          "adapter": { "enum": ["react", "vue"] },
+          "kind": { "type": "string" },
+          "status": { "enum": ["passed", "failed", "unexercised", "unsupported"] },
+          "reason": { "type": "string" },
+          "startedAt": { "type": "string", "format": "date-time" },
+          "durationMs": { "type": "number" },
+          "command": { "type": "array", "items": { "type": "string" } },
+          "url": { "type": "string" },
+          "exitCode": { "type": ["integer", "null"] },
+          "signal": { "type": ["string", "null"] },
+          "observation": { "type": "object" },
+          "comparison": { "type": "object" },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["role", "path", "sha256"],
+              "properties": { "role": { "type": "string" }, "path": { "type": "string" }, "sha256": { "type": "string" } }
+            }
+          }
+        }
+      }
+    }
+  }
+}

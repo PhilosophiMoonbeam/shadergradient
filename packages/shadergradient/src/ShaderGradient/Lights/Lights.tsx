@@ -6,7 +6,7 @@ export function Lights({ lightType, brightness, envPreset }: LightsT) {
   return (
     <>
       {/* TODO: support higher version of three 0.154.0 */}
-      {/* it has darker reflection with the existing shader (packages/shadergradient/src/shaders/a/fragment.glsl) */}
+      {/* it has darker reflection with the existing shared ShaderGradient shader */}
       {lightType === '3d' && (
         <ambientLight intensity={(brightness || 1) * Math.PI} />
       )}

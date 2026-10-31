@@ -6,7 +6,7 @@ import { Server as SocketIO } from 'socket.io'
 import { globby } from 'globby'
 import commonjsPlugin from '@chialab/esbuild-plugin-commonjs'
 
-// Add this GLSL loader plugin
+// Retained postprocessing blend shaders still require raw shader loading.
 const glslLoader = {
   name: 'glsl-loader',
   setup(build) {
@@ -119,7 +119,9 @@ export default defineConfig(async (options) => {
           // Re-export every `exports.X` from the inlined module as a named ESM export (eager snapshot).
           const names = [
             ...new Set(
-              [...code.matchAll(/exports\.([A-Za-z_0-9$]+)\s*=/g)].map((m) => m[1])
+              [...code.matchAll(/exports\.([A-Za-z_0-9$]+)\s*=/g)].map(
+                (m) => m[1]
+              )
             ),
           ]
           const named = names
@@ -168,7 +170,12 @@ export default defineConfig(async (options) => {
     // Everything else (three, @react-three/fiber and its react-reconciler dep incl. 'react-reconciler/constants')
     // must be bundled, otherwise the sandbox throws "Unable to resolve specifier".
     external: ['react', 'framer'],
-    noExternal: ['three', '@react-three/fiber', 'react-reconciler'],
+    noExternal: [
+      '@shadergradient/core',
+      'three',
+      '@react-three/fiber',
+      'react-reconciler',
+    ],
     esbuildPlugins: [glslLoader, reconcilerProdPlugin, commonjsPlugin()],
     async onSuccess() {
       if (!isDev) return

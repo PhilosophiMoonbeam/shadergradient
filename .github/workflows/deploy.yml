@@ -45,6 +45,7 @@ jobs:
         run: |
           cd main
           pnpm install --no-frozen-lockfile
+          pnpm --filter=@shadergradient/core build
           pnpm --filter=@shadergradient/react release:framer
           cp -rf packages/shadergradient/release/* $GITHUB_WORKSPACE/pages/
           pnpm --filter=ui release

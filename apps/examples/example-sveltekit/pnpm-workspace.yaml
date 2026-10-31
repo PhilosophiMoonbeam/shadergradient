@@ -1,0 +1,9 @@
+packages:
+  - .
+
+onlyBuiltDependencies:
+  - esbuild
+
+# Resolve the native package's packed ^0.1.0 dependency without publication.
+overrides:
+  '@shadergradient/core': file:./shadergradient-core-0.1.0.tgz

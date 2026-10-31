@@ -36,13 +36,6 @@ export const links = [
   },
 ]
 
-// useCameraAnimation
-
-export const defaultPlanesZoom = 1
-export const defaultSphereDistance = 14
-export const zoomOutPlanes = { zoom: 1, distance: 14 }
-export const zoomOutSphere = { zoom: 5, distance: 14 }
-
 export const aboutAngles = [190, 140]
 export const aboutPositions = [0, 10, 0]
 export const aboutRotations = [0, 10, 50]
@@ -68,10 +61,6 @@ export const mainLoading = {
   // mesh
   to: 1, // end factor (0 -> 1) for the mesh noisestrength
 }
-
-// environment hdr
-export const defaultEnvBasePath =
-  'https://ruucm.github.io/shadergradient/ui@0.0.0/assets/hdr/'
 
 // ----------------------------- [FIGMA PLUGIN] ----------------------------------
 export const STRIPE_BUY_YEARLY_URL = 'https://buy.stripe.com/00g5kV0g553QcjC9AB'

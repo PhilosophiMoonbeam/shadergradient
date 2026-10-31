@@ -2,7 +2,7 @@
 import { ShaderMaterial, UniformsUtils } from 'three'
 
 import { BlendFunction, BlendMode } from './blending/index'
-import { HalftoneShader } from './HalftoneShader'
+import { HalftoneShader } from '@shadergradient/core'
 import { Pass, FullScreenQuad } from './Pass'
 // import { BlendFunction } from './BlendFunction'
 

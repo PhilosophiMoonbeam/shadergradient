@@ -1,0 +1,15 @@
+{
+  "id": "kit-current",
+  "kind": "kit",
+  "svelte": "5.57.3",
+  "threlte": "8.6.1",
+  "three": "0.186.1",
+  "vite": "8.2.1",
+  "plugin": "7.3.0",
+  "status": "passed",
+  "advertisedBounds": null,
+  "packageManager": "pnpm@10.12.4",
+  "nodeRequirement": ">=22.17",
+  "result": "results/result.json",
+  "scope": "pre-extraction canonical fixture, not packed core/native qualification"
+}

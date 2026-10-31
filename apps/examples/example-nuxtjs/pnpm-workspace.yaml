@@ -1,3 +1,5 @@
 onlyBuiltDependencies:
   - esbuild
   - unrs-resolver
+overrides:
+  '@shadergradient/core': file:./shadergradient-core.tgz

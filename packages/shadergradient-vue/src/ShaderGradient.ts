@@ -15,8 +15,7 @@ import {
   watch,
   watchEffect,
 } from 'vue'
-import { HalftoneShader } from '@shadergradient/react/src/ShaderGradient/PostProcessing/lib/pp/HalftoneShader.js'
-import { defaultEnvBasePath } from '@shadergradient/react/src/consts'
+import { HalftoneShader, defaultEnvBasePath } from '@shadergradient/core'
 import { canvasContext } from './ShaderGradientCanvas'
 import { createMaterial, updateMaterial } from './material'
 import type { ResolvedGradientProps } from './material'
@@ -191,7 +190,8 @@ export const ShaderGradient = defineComponent({
     watch(
       [context.camera.activeCamera, context.renderer.isInitialized],
       ([camera, isInitialized], _previous, cleanup) => {
-        if (!isInitialized || !(camera instanceof THREE.PerspectiveCamera)) return
+        if (!isInitialized || !(camera instanceof THREE.PerspectiveCamera))
+          return
         const renderer = context.renderer.instance as THREE.WebGLRenderer
         const controls = new CameraControls(camera, renderer.domElement)
         controls.maxDistance = 1000

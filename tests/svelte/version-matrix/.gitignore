@@ -1,0 +1,12 @@
+*/node_modules/
+*/.fixture/
+*/dist/
+*/dist-ssr/
+*/build/
+*/.svelte-kit/
+*/results/
+*/results-history/
+*/index.html
+*/main.js
+*/src/
+*/tsconfig.json

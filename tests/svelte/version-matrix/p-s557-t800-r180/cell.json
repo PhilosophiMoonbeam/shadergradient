@@ -1,0 +1,15 @@
+{
+  "id": "p-s557-t800-r180",
+  "kind": "plain",
+  "svelte": "5.57.3",
+  "threlte": "8.0.0",
+  "three": "0.180.0",
+  "vite": "8.2.1",
+  "plugin": "7.3.0",
+  "status": "passed",
+  "advertisedBounds": null,
+  "packageManager": "pnpm@10.12.4",
+  "nodeRequirement": ">=22.17",
+  "result": "results/result.json",
+  "scope": "pre-extraction canonical fixture, not packed core/native qualification"
+}

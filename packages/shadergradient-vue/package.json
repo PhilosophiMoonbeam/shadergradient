@@ -38,6 +38,7 @@
     "vue": "^3.5.0"
   },
   "dependencies": {
+    "@shadergradient/core": "workspace:^",
     "camera-controls": "2.9.0"
   }
 }

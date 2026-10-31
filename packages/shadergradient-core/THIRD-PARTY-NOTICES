@@ -1,0 +1,73 @@
+ShaderGradient attribution and third-party notices
+=================================================
+
+ShaderGradient
+--------------
+The canonical presets, shaders, and modified Halftone descriptor were moved
+from the ShaderGradient React source tree. Published upstream metadata declares
+the author as ruucm and the license as MIT:
+https://registry.npmjs.org/@shadergradient/react/2.4.20
+https://github.com/ruucm/shadergradient
+
+The package-local LICENSE supplies the MIT terms with the supported author
+attribution and no inferred copyright year. It does not replace the notices
+below or assert that third-party contributions were relicensed. No repository
+root license was introduced by this extraction.
+
+GLSL noise
+----------
+Canonical shader comments retain their original upstream source links:
+https://github.com/hughsk/glsl-noise/blob/master/periodic/3d.glsl
+License source: https://raw.githubusercontent.com/hughsk/glsl-noise/master/LICENSE
+
+Copyright (C) 2011 by Ashima Arts (Simplex noise)
+Copyright (C) 2011 by Stefan Gustavson (Classic noise)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Three.js
+--------
+The canonical shaders contain Three.js shader-chunk-derived code and the
+Halftone descriptor is a modified Three.js effect. This notice is attribution,
+not a runtime dependency or a new Three.js version requirement.
+https://github.com/mrdoob/three.js
+https://github.com/mrdoob/three.js/blob/r186/examples/jsm/shaders/HalftoneShader.js
+License source: https://raw.githubusercontent.com/mrdoob/three.js/r186/LICENSE
+
+The MIT License
+
+Copyright © 2010-2026 three.js authors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.

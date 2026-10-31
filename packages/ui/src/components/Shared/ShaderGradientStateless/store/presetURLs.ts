@@ -1,6 +1,4 @@
-import { presets } from '@shadergradient/react'
-
-export const initialActivePreset = 0
+import { presets } from '@shadergradient/core'
 
 export const PRESETS = convertPresets(presets)
 

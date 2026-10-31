@@ -1,0 +1,846 @@
+{
+  "schemaVersion": 1,
+  "phase": "pre",
+  "createdAt": "2026-10-28T03:29:49.552Z",
+  "referenceOrigin": {
+    "purpose": "Portable immutable successful F02 Mint visual reference; never rerendered or re-pinned during native implementation. Other original failures and full raw evidence remain in the original F02 evidence set.",
+    "sourceIndexSHA256": "fa1abd1128a3548c2957afce6dba6518caeabcaf7283716c35fbe063dbb654ea",
+    "selectedOriginalRowCanonicalSHA256": "f8f0591f09765b96a1dcc9d2c0a94b27e5b406fffbfccb3be8fb3f90f27628ab",
+    "selection": "Only original successful vue/preset-mint observation and canvas artifact; original observation and PNG unchanged. Browser logs/traces and unrelated cases intentionally not bundled."
+  },
+  "provenance": {
+    "commit": "785dcd413342040bbc78c4b2958a93f8343f1abf",
+    "node": "v24.15.0",
+    "platform": "linux",
+    "arch": "x64",
+    "browser": {
+      "name": "chromium",
+      "version": "153.0.8010.12",
+      "playwright": "1.63.0",
+      "executable": "/home/bbferko/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+      "launchArgs": [],
+      "headless": true
+    },
+    "vue": {
+      "version": "0.1.0",
+      "entrySha256": "99ec3d06060de481f48c60a43fe3cff7d0117806fd34c15f0aa1fee21d83e95e",
+      "dependencies": [
+        {
+          "name": "vue",
+          "version": "3.5.42"
+        },
+        {
+          "name": "three",
+          "version": "0.186.0"
+        },
+        {
+          "name": "@tresjs/core",
+          "version": "5.9.0"
+        },
+        {
+          "name": "vite",
+          "version": "8.2.2"
+        }
+      ]
+    },
+    "recipeInputHashes": {
+      "scenarios.mjs": "237e0263eb8b69f645889b7e95ccae176ed3a328c1ac6f5024fe276040c66677",
+      "run.mjs": "98f29cc75c3459e0f9d533aa82a5fbf719a4139caf9b060deee13e9711cec86a",
+      "server.mjs": "6a56b3069397591cec5e28b65ed9f6f987b50088dedd6c0753a98cf0d52c01ee",
+      "fixture/fixture.mjs": "67e5d32e8b6eaa960ef4302a29130add0a1b8f5a14de1c0e13f5b498669c8669",
+      "fixture/vue.mjs": "a815edc2f8ed9a6a27cb7f2bf65e3d424bc4f1c097c01038267fba8b3081667f",
+      "pnpm-lock.yaml": "c7624c6aa4e6f5cd390351312c95ad2487013b654583a9c275d797fcd242a069"
+    }
+  },
+  "results": [
+    {
+      "id": "vue/preset-mint",
+      "kind": "visual",
+      "status": "passed",
+      "observation": {
+        "inputs": {
+          "preset": "mint",
+          "props": {
+            "range": "disabled",
+            "rangeStart": 0,
+            "rangeEnd": 40,
+            "frameRate": 10,
+            "destination": "onCanvas",
+            "format": "gif",
+            "animate": "off",
+            "axesHelper": "off",
+            "brightness": 1.2,
+            "cAzimuthAngle": 170,
+            "cDistance": 4.4,
+            "cPolarAngle": 70,
+            "cameraZoom": 1,
+            "color1": "#94ffd1",
+            "color2": "#6bf5ff",
+            "color3": "#ffffff",
+            "embedMode": "off",
+            "envPreset": "city",
+            "gizmoHelper": "hide",
+            "grain": "off",
+            "lightType": "3d",
+            "pixelDensity": 1,
+            "fov": 45,
+            "positionX": 0,
+            "positionY": 0.9,
+            "positionZ": -0.3,
+            "reflection": 0.1,
+            "rotationX": 45,
+            "rotationY": 0,
+            "rotationZ": 0,
+            "shader": "defaults",
+            "type": "waterPlane",
+            "uAmplitude": 0,
+            "uDensity": 1.2,
+            "uFrequency": 0,
+            "uSpeed": 0.2,
+            "uStrength": 3.4,
+            "uTime": 0,
+            "wireframe": false,
+            "enableTransition": false
+          },
+          "canvas": {
+            "style": {
+              "width": "480px",
+              "height": "320px"
+            },
+            "pixelDensity": 1,
+            "lazyLoad": false,
+            "pointerEvents": "auto",
+            "envBasePath": "/baseline-hdr/"
+          }
+        },
+        "exports": [
+          "ShaderGradient",
+          "ShaderGradientCanvas",
+          "ShaderGradientSource",
+          "ShaderGradientView",
+          "presets"
+        ],
+        "renders": 57,
+        "samples": [
+          {
+            "at": 640.1000000014901,
+            "uTime": 0
+          },
+          {
+            "at": 783.8999999985099,
+            "uTime": 0
+          },
+          {
+            "at": 827.5,
+            "uTime": 0
+          },
+          {
+            "at": 877.6000000014901,
+            "uTime": 0
+          },
+          {
+            "at": 928.2999999970198,
+            "uTime": 0
+          },
+          {
+            "at": 979.1999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 1022.2999999970198,
+            "uTime": 0
+          },
+          {
+            "at": 1073.3999999985099,
+            "uTime": 0
+          },
+          {
+            "at": 1121.8999999985099,
+            "uTime": 0
+          },
+          {
+            "at": 1169.5,
+            "uTime": 0
+          },
+          {
+            "at": 1220.6000000014901,
+            "uTime": 0
+          },
+          {
+            "at": 1268.6999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 1312.2999999970198,
+            "uTime": 0
+          },
+          {
+            "at": 1355.1000000014901,
+            "uTime": 0
+          },
+          {
+            "at": 1399.2999999970198,
+            "uTime": 0
+          },
+          {
+            "at": 1444.2999999970198,
+            "uTime": 0
+          },
+          {
+            "at": 1488.1999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 1543,
+            "uTime": 0
+          },
+          {
+            "at": 1587.1999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 1633.1999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 1675.2999999970198,
+            "uTime": 0
+          },
+          {
+            "at": 1718.7999999970198,
+            "uTime": 0
+          },
+          {
+            "at": 1764.1999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 1812.1000000014901,
+            "uTime": 0
+          },
+          {
+            "at": 1859.1999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 1903.1999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 1951.7999999970198,
+            "uTime": 0
+          },
+          {
+            "at": 1996.1999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 2040.7999999970198,
+            "uTime": 0
+          },
+          {
+            "at": 2086.89999999851,
+            "uTime": 0
+          },
+          {
+            "at": 2131.6999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 2177.7999999970198,
+            "uTime": 0
+          },
+          {
+            "at": 2220.6999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 2264.60000000149,
+            "uTime": 0
+          },
+          {
+            "at": 2308.10000000149,
+            "uTime": 0
+          },
+          {
+            "at": 2351.7999999970198,
+            "uTime": 0
+          },
+          {
+            "at": 2396.60000000149,
+            "uTime": 0
+          },
+          {
+            "at": 2443.60000000149,
+            "uTime": 0
+          },
+          {
+            "at": 2485,
+            "uTime": 0
+          },
+          {
+            "at": 2527,
+            "uTime": 0
+          },
+          {
+            "at": 2568.89999999851,
+            "uTime": 0
+          },
+          {
+            "at": 2610.5,
+            "uTime": 0
+          },
+          {
+            "at": 2653.7999999970198,
+            "uTime": 0
+          },
+          {
+            "at": 2694.5,
+            "uTime": 0
+          },
+          {
+            "at": 2735.7999999970198,
+            "uTime": 0
+          },
+          {
+            "at": 2777.89999999851,
+            "uTime": 0
+          },
+          {
+            "at": 2820.6999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 2861.6999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 2905.5,
+            "uTime": 0
+          },
+          {
+            "at": 2953.5,
+            "uTime": 0
+          },
+          {
+            "at": 3002.1999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 3058.5,
+            "uTime": 0
+          },
+          {
+            "at": 3113.2999999970198,
+            "uTime": 0
+          },
+          {
+            "at": 3164.6999999955297,
+            "uTime": 0
+          },
+          {
+            "at": 3211.5,
+            "uTime": 0
+          },
+          {
+            "at": 3257.39999999851,
+            "uTime": 0
+          },
+          {
+            "at": 3303.7999999970198,
+            "uTime": 0
+          }
+        ],
+        "camera": [
+          {
+            "at": 633.8999999985099,
+            "value": {
+              "cAzimuthAngle": 170,
+              "cPolarAngle": 70,
+              "cDistance": 4.4
+            }
+          }
+        ],
+        "errors": [],
+        "latest": {
+          "time": 3303.1999999955297,
+          "uniforms": {
+            "uTime": 0,
+            "uLoadingTime": 1,
+            "uIntensity": 0.5,
+            "uTransparency": 0.1,
+            "uRefraction": 1.5,
+            "uChromaticAberration": 0.1,
+            "uFresnelPower": 2,
+            "uReflectivity": 0.9,
+            "uWaveAmplitude": 0.02,
+            "uWaveFrequency": 5,
+            "uDistortion": 0.1,
+            "uFlowSpeed": 0.1,
+            "uFlowDirection": [
+              1,
+              0.5
+            ],
+            "uLiquidEffect": 0.5,
+            "uFoamIntensity": 0.3,
+            "uSpeed": 0.2,
+            "uNoiseDensity": 1.2,
+            "uNoiseStrength": 3.4,
+            "uFrequency": 0,
+            "uAmplitude": 0,
+            "uLoop": 0,
+            "uLoopDuration": 5,
+            "uC1r": 0.5803921568627451,
+            "uC1g": 1,
+            "uC1b": 0.8196078431372549,
+            "uColor1": [
+              0.5803921568627451,
+              1,
+              0.8196078431372549
+            ],
+            "uC2r": 0.4196078431372549,
+            "uC2g": 0.9607843137254902,
+            "uC2b": 1,
+            "uColor2": [
+              0.4196078431372549,
+              0.9607843137254902,
+              1
+            ],
+            "uC3r": 1,
+            "uC3g": 1,
+            "uC3b": 1,
+            "uColor3": [
+              1,
+              1,
+              1
+            ]
+          },
+          "geometry": {
+            "type": "PlaneGeometry",
+            "parameters": {
+              "width": 10,
+              "height": 10,
+              "widthSegments": 192,
+              "heightSegments": 192
+            },
+            "vertices": 37249,
+            "indices": 221184
+          },
+          "material": {
+            "type": "MeshPhysicalMaterial",
+            "wireframe": false,
+            "roughness": 0.9,
+            "metalness": 0.2,
+            "transmission": 0,
+            "transparent": false
+          },
+          "transform": {
+            "position": [
+              0,
+              0.9,
+              -0.3
+            ],
+            "rotation": [
+              0.7853981633974483,
+              0,
+              0,
+              "XYZ"
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          "camera": {
+            "position": [
+              0.7179740091327529,
+              1.504888630632943,
+              -4.0718329449526225
+            ],
+            "quaternion": [
+              -0.015134435901338622,
+              0.9810602621904069,
+              0.17298739392508952,
+              0.08583165117743126
+            ],
+            "zoom": 1,
+            "fov": 45
+          },
+          "environment": false,
+          "renderer": {
+            "revision": "186",
+            "outputColorSpace": "srgb-linear",
+            "toneMapping": 0,
+            "pixelRatio": 1,
+            "width": 480,
+            "height": 320,
+            "backend": "webgl2",
+            "vendor": "Google Inc. (Google)",
+            "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+            "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+            "shadingLanguage": "WebGL GLSL ES 3.00 (OpenGL ES GLSL ES 3.0 Chromium)"
+          }
+        },
+        "before": {
+          "inputs": {
+            "preset": "mint",
+            "props": {
+              "range": "disabled",
+              "rangeStart": 0,
+              "rangeEnd": 40,
+              "frameRate": 10,
+              "destination": "onCanvas",
+              "format": "gif",
+              "animate": "off",
+              "axesHelper": "off",
+              "brightness": 1.2,
+              "cAzimuthAngle": 170,
+              "cDistance": 4.4,
+              "cPolarAngle": 70,
+              "cameraZoom": 1,
+              "color1": "#94ffd1",
+              "color2": "#6bf5ff",
+              "color3": "#ffffff",
+              "embedMode": "off",
+              "envPreset": "city",
+              "gizmoHelper": "hide",
+              "grain": "off",
+              "lightType": "3d",
+              "pixelDensity": 1,
+              "fov": 45,
+              "positionX": 0,
+              "positionY": 0.9,
+              "positionZ": -0.3,
+              "reflection": 0.1,
+              "rotationX": 45,
+              "rotationY": 0,
+              "rotationZ": 0,
+              "shader": "defaults",
+              "type": "waterPlane",
+              "uAmplitude": 0,
+              "uDensity": 1.2,
+              "uFrequency": 0,
+              "uSpeed": 0.2,
+              "uStrength": 3.4,
+              "uTime": 0,
+              "wireframe": false,
+              "enableTransition": false
+            },
+            "canvas": {
+              "style": {
+                "width": "480px",
+                "height": "320px"
+              },
+              "pixelDensity": 1,
+              "lazyLoad": false,
+              "pointerEvents": "auto",
+              "envBasePath": "/baseline-hdr/"
+            }
+          },
+          "exports": [
+            "ShaderGradient",
+            "ShaderGradientCanvas",
+            "ShaderGradientSource",
+            "ShaderGradientView",
+            "presets"
+          ],
+          "renders": 37,
+          "samples": [
+            {
+              "at": 640.1000000014901,
+              "uTime": 0
+            },
+            {
+              "at": 783.8999999985099,
+              "uTime": 0
+            },
+            {
+              "at": 827.5,
+              "uTime": 0
+            },
+            {
+              "at": 877.6000000014901,
+              "uTime": 0
+            },
+            {
+              "at": 928.2999999970198,
+              "uTime": 0
+            },
+            {
+              "at": 979.1999999955297,
+              "uTime": 0
+            },
+            {
+              "at": 1022.2999999970198,
+              "uTime": 0
+            },
+            {
+              "at": 1073.3999999985099,
+              "uTime": 0
+            },
+            {
+              "at": 1121.8999999985099,
+              "uTime": 0
+            },
+            {
+              "at": 1169.5,
+              "uTime": 0
+            },
+            {
+              "at": 1220.6000000014901,
+              "uTime": 0
+            },
+            {
+              "at": 1268.6999999955297,
+              "uTime": 0
+            },
+            {
+              "at": 1312.2999999970198,
+              "uTime": 0
+            },
+            {
+              "at": 1355.1000000014901,
+              "uTime": 0
+            },
+            {
+              "at": 1399.2999999970198,
+              "uTime": 0
+            },
+            {
+              "at": 1444.2999999970198,
+              "uTime": 0
+            },
+            {
+              "at": 1488.1999999955297,
+              "uTime": 0
+            },
+            {
+              "at": 1543,
+              "uTime": 0
+            },
+            {
+              "at": 1587.1999999955297,
+              "uTime": 0
+            },
+            {
+              "at": 1633.1999999955297,
+              "uTime": 0
+            },
+            {
+              "at": 1675.2999999970198,
+              "uTime": 0
+            },
+            {
+              "at": 1718.7999999970198,
+              "uTime": 0
+            },
+            {
+              "at": 1764.1999999955297,
+              "uTime": 0
+            },
+            {
+              "at": 1812.1000000014901,
+              "uTime": 0
+            },
+            {
+              "at": 1859.1999999955297,
+              "uTime": 0
+            },
+            {
+              "at": 1903.1999999955297,
+              "uTime": 0
+            },
+            {
+              "at": 1951.7999999970198,
+              "uTime": 0
+            },
+            {
+              "at": 1996.1999999955297,
+              "uTime": 0
+            },
+            {
+              "at": 2040.7999999970198,
+              "uTime": 0
+            },
+            {
+              "at": 2086.89999999851,
+              "uTime": 0
+            },
+            {
+              "at": 2131.6999999955297,
+              "uTime": 0
+            },
+            {
+              "at": 2177.7999999970198,
+              "uTime": 0
+            },
+            {
+              "at": 2220.6999999955297,
+              "uTime": 0
+            },
+            {
+              "at": 2264.60000000149,
+              "uTime": 0
+            },
+            {
+              "at": 2308.10000000149,
+              "uTime": 0
+            },
+            {
+              "at": 2351.7999999970198,
+              "uTime": 0
+            },
+            {
+              "at": 2396.60000000149,
+              "uTime": 0
+            }
+          ],
+          "camera": [
+            {
+              "at": 633.8999999985099,
+              "value": {
+                "cAzimuthAngle": 170,
+                "cPolarAngle": 70,
+                "cDistance": 4.4
+              }
+            }
+          ],
+          "errors": [],
+          "latest": {
+            "time": 2396.1999999955297,
+            "uniforms": {
+              "uTime": 0,
+              "uLoadingTime": 1,
+              "uIntensity": 0.5,
+              "uTransparency": 0.1,
+              "uRefraction": 1.5,
+              "uChromaticAberration": 0.1,
+              "uFresnelPower": 2,
+              "uReflectivity": 0.9,
+              "uWaveAmplitude": 0.02,
+              "uWaveFrequency": 5,
+              "uDistortion": 0.1,
+              "uFlowSpeed": 0.1,
+              "uFlowDirection": [
+                1,
+                0.5
+              ],
+              "uLiquidEffect": 0.5,
+              "uFoamIntensity": 0.3,
+              "uSpeed": 0.2,
+              "uNoiseDensity": 1.2,
+              "uNoiseStrength": 3.4,
+              "uFrequency": 0,
+              "uAmplitude": 0,
+              "uLoop": 0,
+              "uLoopDuration": 5,
+              "uC1r": 0.5803921568627451,
+              "uC1g": 1,
+              "uC1b": 0.8196078431372549,
+              "uColor1": [
+                0.5803921568627451,
+                1,
+                0.8196078431372549
+              ],
+              "uC2r": 0.4196078431372549,
+              "uC2g": 0.9607843137254902,
+              "uC2b": 1,
+              "uColor2": [
+                0.4196078431372549,
+                0.9607843137254902,
+                1
+              ],
+              "uC3r": 1,
+              "uC3g": 1,
+              "uC3b": 1,
+              "uColor3": [
+                1,
+                1,
+                1
+              ]
+            },
+            "geometry": {
+              "type": "PlaneGeometry",
+              "parameters": {
+                "width": 10,
+                "height": 10,
+                "widthSegments": 192,
+                "heightSegments": 192
+              },
+              "vertices": 37249,
+              "indices": 221184
+            },
+            "material": {
+              "type": "MeshPhysicalMaterial",
+              "wireframe": false,
+              "roughness": 0.9,
+              "metalness": 0.2,
+              "transmission": 0,
+              "transparent": false
+            },
+            "transform": {
+              "position": [
+                0,
+                0.9,
+                -0.3
+              ],
+              "rotation": [
+                0.7853981633974483,
+                0,
+                0,
+                "XYZ"
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            },
+            "camera": {
+              "position": [
+                0.7179740091327529,
+                1.504888630632943,
+                -4.0718329449526225
+              ],
+              "quaternion": [
+                -0.015134435901338622,
+                0.9810602621904069,
+                0.17298739392508952,
+                0.08583165117743126
+              ],
+              "zoom": 1,
+              "fov": 45
+            },
+            "environment": false,
+            "renderer": {
+              "revision": "186",
+              "outputColorSpace": "srgb-linear",
+              "toneMapping": 0,
+              "pixelRatio": 1,
+              "width": 480,
+              "height": 320,
+              "backend": "webgl2",
+              "vendor": "Google Inc. (Google)",
+              "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+              "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+              "shadingLanguage": "WebGL GLSL ES 3.00 (OpenGL ES GLSL ES 3.0 Chromium)"
+            }
+          }
+        },
+        "pixels": {
+          "width": 480,
+          "height": 320,
+          "sampledColors": 1105
+        }
+      },
+      "artifacts": [
+        {
+          "role": "canvas",
+          "path": "artifacts/vue--preset-mint.png",
+          "sha256": "15a4941c79c68186068ab3fa618a6ad5f3ac482b9df9e610cd3314e824528bbb"
+        }
+      ]
+    }
+  ]
+}

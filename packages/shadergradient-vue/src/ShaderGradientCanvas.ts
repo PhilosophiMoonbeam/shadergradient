@@ -14,7 +14,7 @@ import {
   watchEffect,
 } from 'vue'
 import type { InjectionKey, PropType, Ref } from 'vue'
-import { defaultEnvBasePath } from '@shadergradient/react/src/consts'
+import { defaultEnvBasePath } from '@shadergradient/core'
 
 export const canvasContext: InjectionKey<{
   envBasePath: Ref<string>
@@ -58,7 +58,8 @@ export const ShaderGradientCanvas = defineComponent({
       const gl =
         (canvas.getContext('webgl2') as WebGL2RenderingContext | null) ??
         (canvas.getContext('webgl') as WebGLRenderingContext | null)
-      if (gl && !gl.isContextLost()) gl.getExtension('WEBGL_lose_context')?.loseContext()
+      if (gl && !gl.isContextLost())
+        gl.getExtension('WEBGL_lose_context')?.loseContext()
     }
 
     watch(
@@ -100,7 +101,11 @@ export const ShaderGradientCanvas = defineComponent({
         const canvas = container.value?.querySelector('canvas')
         if (canvas) canvasElement.value = canvas
       })
-      if (container.value) canvasWatcher.observe(container.value, { childList: true, subtree: true })
+      if (container.value)
+        canvasWatcher.observe(container.value, {
+          childList: true,
+          subtree: true,
+        })
       cleanupMounted = () => {
         stop()
         canvasWatcher.disconnect()

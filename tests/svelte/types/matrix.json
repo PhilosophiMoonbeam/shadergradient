@@ -1,0 +1,476 @@
+{
+  "schemaVersion": 1,
+  "scope": "Compiled public consumers of generated package exports; internal Node behavior tests are separate unit-only coverage.",
+  "bounds": {
+    "svelte": ["5.40.0", "5.57.1", "5.57.3"],
+    "@threlte/core": "8.6.1",
+    "three": "0.186.1",
+    "typescript": "6.0.3",
+    "svelte-check": "4.7.7",
+    "@types/three": "0.186.0",
+    "producerBuildTool": "@sveltejs/package@3.0.1",
+    "evidence": "Exact qualification targets, not widened SDK peer claims. F03 established plain 5.40.0/current 5.57.3; F22 compiled both public matrices. F26 must separately qualify the Kit-declared 5.57.1 floor against final artifacts.",
+    "kit": "Kit 3.1.0 declares Svelte ^5.57.1, plugin 7, Vite ^8.0.12 and TypeScript 6. Its lower qualification cell uses 5.57.1; plain 5.40.0 uses F03's Vite 7.1.4/plugin 6.2.1. Do not force incompatible Kit 5.40 peers."
+  },
+  "prerequisites": [
+    "Parent builds actual @shadergradient/core and @shadergradient/svelte generated exports once before qualification.",
+    "consumerRoot has installed @shadergradient/svelte and its real @shadergradient/core dependency, the selected exact peers, @types/three, TypeScript and svelte-check; no paths aliases.",
+    "For current workspace qualification, apps/example-svelte-dev is the default consumerRoot with an actual public native dependency. The SDK root's self-reference is not available inside a copied independent fixture package and is not a consumer substitute. Independent lower/current packed roots must install their own compiler/tooling.",
+    "No installs, SDK builds, application builds, preparation, formatters or browser/runtime checks run in this type runner."
+  ],
+  "configuration": {
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "skipLibCheck": "Only dependency implementation declaration checking is skipped; all public component prop/callback/snippet assignments in consumers are checked.",
+    "paths": "none",
+    "customConditions": ["svelte"]
+  },
+  "positive": {
+    "id": "positive",
+    "files": [
+      "positive/CanvasConsumer.svelte",
+      "positive/ExternalConsumer.svelte",
+      "positive/SourceConsumer.svelte",
+      "positive/public-types.ts"
+    ],
+    "expectation": "Exit 0, zero errors and zero warnings."
+  },
+  "negative": [
+    {
+      "id": "external-cAzimuthAngle",
+      "file": "negative/external-cAzimuthAngle.svelte",
+      "purpose": "External mode forbids managed cAzimuthAngle",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient mode=\"external\" cAzimuthAngle={37} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "external-cPolarAngle",
+      "file": "negative/external-cPolarAngle.svelte",
+      "purpose": "External mode forbids managed cPolarAngle",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient mode=\"external\" cPolarAngle={81} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "external-cDistance",
+      "file": "negative/external-cDistance.svelte",
+      "purpose": "External mode forbids managed cDistance",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient mode=\"external\" cDistance={4.25} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "external-cameraZoom",
+      "file": "negative/external-cameraZoom.svelte",
+      "purpose": "External mode forbids managed cameraZoom",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient mode=\"external\" cameraZoom={2.75} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "external-smoothTime",
+      "file": "negative/external-smoothTime.svelte",
+      "purpose": "External mode forbids managed smoothTime",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient mode=\"external\" smoothTime={0.1} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "external-enableTransition",
+      "file": "negative/external-enableTransition.svelte",
+      "purpose": "External mode forbids managed enableTransition",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient mode=\"external\" enableTransition={false} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "external-zoomOut",
+      "file": "negative/external-zoomOut.svelte",
+      "purpose": "External mode forbids managed zoomOut",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient mode=\"external\" zoomOut={false} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "external-lightType",
+      "file": "negative/external-lightType.svelte",
+      "purpose": "External mode forbids managed lightType",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient mode=\"external\" lightType=\"env\" />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "external-brightness",
+      "file": "negative/external-brightness.svelte",
+      "purpose": "External mode forbids managed brightness",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient mode=\"external\" brightness={1.2} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "external-envPreset",
+      "file": "negative/external-envPreset.svelte",
+      "purpose": "External mode forbids managed envPreset",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient mode=\"external\" envPreset=\"dawn\" />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "external-grain",
+      "file": "negative/external-grain.svelte",
+      "purpose": "External mode forbids managed grain",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient mode=\"external\" grain=\"on\" />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "external-grainBlending",
+      "file": "negative/external-grainBlending.svelte",
+      "purpose": "External mode forbids managed grainBlending",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient mode=\"external\" grainBlending={0.75} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "external-toggleAxis",
+      "file": "negative/external-toggleAxis.svelte",
+      "purpose": "External mode forbids managed toggleAxis",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient mode=\"external\" toggleAxis={true} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "external-onCameraUpdate",
+      "file": "negative/external-onCameraUpdate.svelte",
+      "purpose": "External mode forbids managed onCameraUpdate",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient mode=\"external\" onCameraUpdate={() => {}} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "invalid-shader",
+      "file": "negative/invalid-shader.svelte",
+      "purpose": "Shader family is a closed public union",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient shader=\"plasma\" />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "invalid-type",
+      "file": "negative/invalid-type.svelte",
+      "purpose": "Geometry is a closed public union",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient type=\"cube\" />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "camera-callback",
+      "file": "negative/camera-callback.svelte",
+      "purpose": "Camera callback receives numeric CameraUpdate, not text",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradient onCameraUpdate={(update: string) => console.info(update)} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "error-callback",
+      "file": "negative/error-callback.svelte",
+      "purpose": "Error callback receives GradientError, not a browser Event",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradientCanvas onError={(error: Event) => console.info(error.type)} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "canvas-fallback-state",
+      "file": "negative/canvas-fallback-state.svelte",
+      "purpose": "Canvas fallback cannot require Source generation",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradientCanvas fallback={wrongFallback} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "source-fallback-state",
+      "file": "negative/source-fallback-state.svelte",
+      "purpose": "Source fallback cannot substitute Canvas state",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradientSource source={source} fallback={wrongFallback} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "view-fallback-state",
+      "file": "negative/view-fallback-state.svelte",
+      "purpose": "View fallback receives SourceState rather than a number",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradientView source={source} fallback={wrongFallback} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "canvas-children-arguments",
+      "file": "negative/canvas-children-arguments.svelte",
+      "purpose": "Canvas children are zero-argument native scene snippets",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradientCanvas children={wrongChildren} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "source-children-arguments",
+      "file": "negative/source-children-arguments.svelte",
+      "purpose": "Source children are zero-argument native scene snippets",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradientSource source={source} children={wrongChildren} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "source-handle",
+      "file": "negative/source-handle.svelte",
+      "purpose": "Source requires an explicit handle, never a global label",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradientSource source=\"shared-label\" />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "view-handle",
+      "file": "negative/view-handle.svelte",
+      "purpose": "View requires an explicit handle, never a global label",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradientView source=\"shared-label\" />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "source-missing-handle",
+      "file": "negative/source-missing-handle.svelte",
+      "purpose": "Source handle is required",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradientSource />",
+        "kind": "required-property"
+      }
+    },
+    {
+      "id": "view-missing-handle",
+      "file": "negative/view-missing-handle.svelte",
+      "purpose": "View handle is required",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradientView />",
+        "kind": "required-property"
+      }
+    },
+    {
+      "id": "source-external-gradient",
+      "file": "negative/source-external-gradient.svelte",
+      "purpose": "Producer gradient is managed, not external mesh-only ownership",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "<ShaderGradientSource source={source} gradient={{ mode: 'external' }} />",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "source-canvas-active",
+      "file": "negative/source-canvas-active.svelte",
+      "purpose": "Producer owns nested Canvas active gating",
+      "expected": {
+        "source": "ts",
+        "codes": [2353],
+        "anchor": "<ShaderGradientSource source={source} canvas={{ active: true }} />",
+        "kind": "excess-property"
+      }
+    },
+    {
+      "id": "source-canvas-density",
+      "file": "negative/source-canvas-density.svelte",
+      "purpose": "Producer owns nested Canvas density",
+      "expected": {
+        "source": "ts",
+        "codes": [2353],
+        "anchor": "<ShaderGradientSource source={source} canvas={{ pixelDensity: 2 }} />",
+        "kind": "excess-property"
+      }
+    },
+    {
+      "id": "view-managed-option",
+      "file": "negative/view-managed-option.svelte",
+      "purpose": "View is a 2D mirror and cannot own managed grain",
+      "expected": {
+        "source": "ts",
+        "codes": [2353],
+        "anchor": "<ShaderGradientView source={source} grain=\"on\" />",
+        "kind": "excess-property"
+      }
+    },
+    {
+      "id": "camera-payload-both",
+      "file": "negative/camera-payload-both.svelte",
+      "purpose": "Camera payload cannot contain both distance and zoom",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "const invalid: CameraUpdate = { cAzimuthAngle: 37, cPolarAngle: 81, cDistance: 4.25, cameraZoom: 2.75 }",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "camera-payload-text",
+      "file": "negative/camera-payload-text.svelte",
+      "purpose": "Rounded distance remains numeric, not a toFixed string",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "const invalid: CameraUpdate = { cAzimuthAngle: 37, cPolarAngle: 81, cDistance: '4.25' }",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "source-producer-callback",
+      "file": "negative/source-producer-callback.svelte",
+      "purpose": "Producer demand callback receives SourceDemand",
+      "expected": {
+        "source": "ts",
+        "codes": [2322],
+        "anchor": "const invalid: SourceProducer = { invalidate() {}, onDemandChange(demand: number) { console.info(demand) } }",
+        "kind": "assignment-incompatibility"
+      }
+    },
+    {
+      "id": "source-frame-callback",
+      "file": "negative/source-frame-callback.svelte",
+      "purpose": "Frame subscriber receives CompletedFrame plus ProducerToken",
+      "expected": {
+        "source": "ts",
+        "codes": [2345],
+        "anchor": "source.subscribeFrames((frame: string) => console.info(frame))",
+        "kind": "argument-incompatibility"
+      }
+    },
+    {
+      "id": "source-state-callback",
+      "file": "negative/source-state-callback.svelte",
+      "purpose": "State subscriber receives SourceState, not CanvasFallbackState",
+      "expected": {
+        "source": "ts",
+        "codes": [2345],
+        "anchor": "source.subscribe((state: CanvasFallbackState) => console.info(state.status))",
+        "kind": "argument-incompatibility"
+      }
+    },
+    {
+      "id": "view-visibility-lease",
+      "file": "negative/view-visibility-lease.svelte",
+      "purpose": "View visibility lease accepts booleans only",
+      "expected": {
+        "source": "ts",
+        "codes": [2345],
+        "anchor": "source.attachView(false).setVisible('visible')",
+        "kind": "argument-incompatibility"
+      }
+    }
+  ],
+  "runner": {
+    "entry": "node tests/svelte/types/run.mjs",
+    "flags": {
+      "--consumer-root <path>": "Installed compiler/package context with an actual native dependency; default apps/example-svelte-dev.",
+      "--case <all|positive|negative-id>": "Default all. Each negative runs as its own isolated Svelte project, not a combined expected-failure project.",
+      "--expect-svelte <5.40.0|5.57.1|5.57.3>": "Assert the selected actual compiler version; when omitted still requires one of the exact qualification targets. Target selection alone is not acceptance evidence.",
+      "--artifact-id <identity>": "Attach parent-provided native/core tarball identities or qualification label to the JSON evidence.",
+      "--report <path>": "Write full JSON including actual contexts, generated export resolution, fixture hashes, stdout/stderr and diagnostics; stdout also receives the report.",
+      "--list": "List fixture case IDs without invoking the compiler.",
+      "--help": "Print invocation contract."
+    },
+    "invocations": [
+      "node --test tests/svelte/contracts/settings.test.mjs tests/svelte/contracts/time.test.mjs",
+      "node tests/svelte/types/run.mjs --consumer-root apps/example-svelte-dev --expect-svelte 5.57.3 --case positive",
+      "node tests/svelte/types/run.mjs --consumer-root /absolute/installed-plain-lower --expect-svelte 5.40.0 --case all --report /absolute/evidence/types-lower.json",
+      "node tests/svelte/types/run.mjs --consumer-root /absolute/installed-current --expect-svelte 5.57.3 --case all --artifact-id native=<tarball-sha256>,core=<tarball-sha256> --report /absolute/evidence/types-packed-current.json",
+      "node tests/svelte/types/run.mjs --consumer-root /absolute/installed-current --case external-grain"
+    ],
+    "cleanup": "Only the unique mkdtemp subtree created inside consumerRoot is removed, in finally. Host app/config/manifests/node_modules/locks are never changed.",
+    "packageResolution": "Metadata and compiler resolution use Node ESM import.meta.resolve with --conditions=svelte in a child ESM eval anchored at the actual consumer or owner package directory, asserting that parent directory. The Svelte condition matches the fixture's real Bundler customConditions and supports Svelte-only public exports such as Threlte. Only an unexported package.json subpath falls back to the package's real conditional root export. Missing dependencies are failures. Native components are resolved, never bare-Node imported; no CJS/private-path aliases are introduced. Evidence retains each resolution URL, parent URL, ESM mode and custom conditions.",
+    "diagnosticOracle": "svelte-check machine-verbose TS source and numeric kind, intersecting the exact unique fixture expression line. Every diagnostic must be intended; dependency/config/import/other-line diagnostics fail, as do warnings or missing completion. Diagnostic wording is retained only as evidence, never matched."
+  },
+  "verification": "Authored edit-only. Parent must execute positive and every negative separately in both supported actual contexts, then rerun the same fixture matrix against identified installed tarballs. No acceptance is claimed by this manifest.",
+  "primarySources": [
+    "https://svelte.dev/docs/kit/packaging",
+    "https://svelte.dev/docs/svelte/snippet",
+    "https://svelte.dev/docs/svelte/typescript",
+    "https://threlte.xyz/docs/reference/core/canvas/"
+  ]
+}

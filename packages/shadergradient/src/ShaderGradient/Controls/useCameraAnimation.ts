@@ -4,7 +4,7 @@ import {
   zoomOutSphere,
   defaultPlanesZoom,
   defaultSphereDistance,
-} from '@/consts'
+} from '@shadergradient/core'
 import { dToR } from '@/utils'
 import { useFrame } from '@react-three/fiber'
 

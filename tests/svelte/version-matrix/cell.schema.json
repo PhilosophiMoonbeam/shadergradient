@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "F03 isolated candidate cell",
+  "type": "object",
+  "required": [
+    "id",
+    "kind",
+    "svelte",
+    "threlte",
+    "three",
+    "vite",
+    "plugin",
+    "status",
+    "advertisedBounds"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "plain",
+        "kit"
+      ]
+    },
+    "svelte": {
+      "type": "string",
+      "pattern": "^5\\."
+    },
+    "threlte": {
+      "type": "string",
+      "pattern": "^8\\."
+    },
+    "three": {
+      "type": "string",
+      "pattern": "^0\\."
+    },
+    "vite": {
+      "type": "string"
+    },
+    "plugin": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "unverified",
+        "passed",
+        "failed"
+      ]
+    },
+    "advertisedBounds": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "result": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,8 @@
+# This directory is its own pnpm workspace root, including when copied out.
+packages: []
+linkWorkspacePackages: false
+resolvePeersFromWorkspaceRoot: false
+onlyBuiltDependencies:
+  - esbuild
+overrides:
+  '@shadergradient/core': file:./shadergradient-core-0.1.0.tgz

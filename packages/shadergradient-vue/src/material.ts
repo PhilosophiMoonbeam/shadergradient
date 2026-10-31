@@ -9,7 +9,7 @@ import {
 import type { IUniform } from 'three'
 import type { ExtractPropTypes } from 'vue'
 import type { gradientProps } from './props'
-import * as shaders from '@shadergradient/react/src/shaders'
+import { shaders, compatibleShader } from '@shadergradient/core'
 
 export type ResolvedGradientProps = ExtractPropTypes<typeof gradientProps>
 
@@ -56,19 +56,6 @@ export function createMaterial(props: ResolvedGradientProps) {
   material.customProgramCacheKey = () => `${props.shader}:${props.type}`
   updateMaterial(material, props)
   return material
-}
-
-function compatibleShader(source: string) {
-  if (source.includes('linearToRelativeLuminance(')) {
-    source = `float shaderGradientLuminance(vec3 color) { return dot(color, vec3(0.2126, 0.7152, 0.0722)); }\n${source.replaceAll(
-      'linearToRelativeLuminance(',
-      'shaderGradientLuminance('
-    )}`
-  }
-  return source.replace(
-    /#include <(?:uv2_pars_vertex|uv2_vertex|uv2_pars_fragment|encodings_fragment)>/g,
-    ''
-  )
 }
 
 export function updateMaterial(

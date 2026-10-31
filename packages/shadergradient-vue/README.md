@@ -1,7 +1,7 @@
 # ShaderGradient for Vue 3
 
-Vue components backed by TresJS and Three.js. The package bundles the existing
-ShaderGradient shaders and presets without importing React or React Three Fiber.
+Vue components backed by TresJS and Three.js. Shared ShaderGradient shaders and
+presets come from `@shadergradient/core`, without importing React or React Three Fiber.
 
 ## Installation
 
@@ -58,7 +58,11 @@ In a Nuxt page (for example, `app/pages/index.vue` in Nuxt 4):
 
 ```vue
 <script setup lang="ts">
-import { ShaderGradient, ShaderGradientCanvas, presets } from '@shadergradient/vue'
+import {
+  ShaderGradient,
+  ShaderGradientCanvas,
+  presets,
+} from '@shadergradient/vue'
 </script>
 
 <template>

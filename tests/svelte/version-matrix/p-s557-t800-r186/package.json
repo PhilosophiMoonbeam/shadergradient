@@ -1,0 +1,29 @@
+{
+  "name": "shadergradient-matrix-p-s557-t800-r186",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.12.4",
+  "engines": {
+    "node": ">=22.17"
+  },
+  "scripts": {
+    "prepare": "node ../shared/prepare.mjs",
+    "build": "vite build",
+    "qualify": "node ../shared/qualify.mjs",
+    "dev": "vite --host 127.0.0.1"
+  },
+  "dependencies": {
+    "svelte": "5.57.3",
+    "@threlte/core": "8.0.0",
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "vite": "8.2.1",
+    "@sveltejs/vite-plugin-svelte": "7.3.0",
+    "esbuild": "0.28.1",
+    "playwright": "1.62.1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  }
+}

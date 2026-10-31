@@ -6,7 +6,7 @@ import path from 'path'
 import { Server as SocketIO } from 'socket.io'
 import { globby } from 'globby'
 
-// Add this GLSL loader plugin
+// Retained postprocessing blend shaders still require raw shader loading.
 const glslLoader = {
   name: 'glsl-loader',
   setup(build) {
@@ -49,6 +49,7 @@ export default defineConfig(async (options) => {
     minify: !isDev,
     clean: true,
     external: [
+      '@shadergradient/core',
       'react',
       'framer',
       '@react-spring/three',

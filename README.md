@@ -63,6 +63,16 @@ See [installation and Vue/Nuxt usage](./packages/shadergradient-vue/README.md)
 for installation commands, component examples, SSR fallbacks, and supported
 dependency versions.
 
+## Svelte 5 and SvelteKit
+
+The native `@shadergradient/svelte` SDK uses Threlte, not a React bridge. It
+provides managed gradients, mesh-only composition in a host-owned Threlte scene,
+and one GPU Source mirrored into multiple 2D Views. Core and native packages are
+currently **local, unpublished `0.1.0` packages**, not registry releases.
+See the [native SDK guide](./packages/shadergradient-svelte/README.md) for
+availability, exact peers, SSR-safe examples, ownership, accessibility and limits,
+and [Svelte contributor setup](./CONTRIBUTING-SVELTE.md) for paired local tarballs.
+
 # Packages
 
 - `@shadergradient/react`
@@ -74,6 +84,12 @@ dependency versions.
 - `@shadergradient/vue`
   - Vue 3 renderer using TresJS, with an SSR-safe canvas for Nuxt usage.
   - See [Vue setup and Nuxt usage](./packages/shadergradient-vue/README.md).
+- `@shadergradient/core`
+  - Framework-neutral shaders, presets, constants and environment manifest.
+  - Local, unpublished `0.1.0`; the manifest does not include HDR binaries.
+- `@shadergradient/svelte`
+  - Native Svelte 5/Threlte Canvas, Gradient, Source, View and explicit source handles.
+  - Local, unpublished `0.1.0`; see the [native SDK guide](./packages/shadergradient-svelte/README.md).
 - `shadergradient-old`
   - Legacy v1 package that bundled store + UI. Keep using this only if you rely on the old with-store build.
 

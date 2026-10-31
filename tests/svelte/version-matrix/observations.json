@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "observations": [
+    {
+      "source": "parent-reported execution",
+      "artifact": "artifact://179",
+      "cell": null,
+      "cellDescription": "Initial current Vite 8.2.1 consumer; exact cell identity remains in parent execution evidence",
+      "phase": "install",
+      "status": "failed",
+      "diagnostic": "Vite 8.2.1 requires esbuild ^0.27 || ^0.28, incompatible with initial fixture pin 0.25.10 under strict peer resolution",
+      "preparation": "Parent separately reported preparation succeeded; not a runtime qualification",
+      "correction": {
+        "esbuild": "0.28.1",
+        "cells": [
+          "p-s557-t800-r180",
+          "p-s557-t800-r186",
+          "p-s557-t861-r180",
+          "p-s557-t861-r186",
+          "kit-current"
+        ],
+        "strictPeerDependencies": true,
+        "verification": "pending parent execution"
+      }
+    },
+    {
+      "source": "parent-reported execution",
+      "artifact": "artifact://182",
+      "preservedResult": "evidence/matrix-current-before-loader-fix.json",
+      "cell": null,
+      "cellDescription": "Current consumer; exact identity is recorded in preserved parent evidence",
+      "phase": "exact-hydration-and-twelve-shaders",
+      "status": "failed",
+      "diagnostic": "TypeError: chromium is undefined because dynamic import of the fixture-resolved Playwright CommonJS entry exposes default only",
+      "passedPrerequisites": ["raw-node", "compiled-svelte-ssr (no server canvas)", "client-build"],
+      "correction": "Load Playwright through the existing fixture-scoped createRequire; preserve previous complete results on every new qualification",
+      "verification": "pending parent execution",
+      "installWarning": "Parent observed ignored esbuild build script; isolated manifests now explicitly approve only esbuild"
+    },
+    {
+      "source": "parent-reported execution",
+      "artifacts": ["artifact://210", "artifact://190"],
+      "cells": [
+        "p-s540-t800-r180",
+        "p-s540-t800-r186",
+        "p-s540-t861-r180",
+        "p-s540-t861-r186",
+        "p-s557-t800-r180",
+        "p-s557-t800-r186",
+        "p-s557-t861-r180",
+        "p-s557-t861-r186"
+      ],
+      "phase": "qualification",
+      "status": "passed",
+      "observed": ["SSR", "exact hydration", "all twelve shader/geometry cases", "canvas unmount/remount"],
+      "scope": "Canonical isolated fixture proof only; final native bounds remain unset"
+    },
+    {
+      "source": "parent-reported execution",
+      "cell": "kit-current",
+      "phase": "client-build",
+      "status": "failed",
+      "diagnostic": "config_file_unsupported: Kit 3.1 does not support svelte.config.js; generated $app/tsconfig was also missing before sync",
+      "preservedResult": "kit-current/results/result.json and existing history; next qualification archives current results before replacement",
+      "correction": "Remove legacy config file, configure adapter directly in sveltekit({ adapter: adapter() }), and run installed Kit 3.1 sync CLI during preparation before build",
+      "verification": "pending parent execution"
+    }
+  ]
+}

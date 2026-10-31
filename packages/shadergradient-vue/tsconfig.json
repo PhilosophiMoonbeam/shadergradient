@@ -7,10 +7,7 @@
     "allowJs": true,
     "skipLibCheck": true,
     "lib": ["ES2022", "DOM"],
-    "esModuleInterop": true,
-    "paths": {
-      "@shadergradient/react/src/*": ["../shadergradient/src/*"]
-    }
+    "esModuleInterop": true
   },
   "include": ["src"]
 }

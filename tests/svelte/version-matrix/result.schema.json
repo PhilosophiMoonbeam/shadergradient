@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "F03 exercised cell result",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "cell",
+    "status",
+    "node",
+    "resolutions",
+    "steps",
+    "ssr",
+    "browser",
+    "finalCoreCertified",
+    "finalNativeCertified"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "cell": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "running",
+        "passed",
+        "failed"
+      ]
+    },
+    "node": {
+      "type": "string"
+    },
+    "resolutions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "status"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "running",
+              "passed",
+              "failed"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "ssr": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "browser": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "finalCoreCertified": {
+      "const": false
+    },
+    "finalNativeCertified": {
+      "const": false
+    }
+  },
+  "additionalProperties": true
+}

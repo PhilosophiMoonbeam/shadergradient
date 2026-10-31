@@ -1,7 +1,8 @@
 import * as qs from 'query-string'
 import { create } from 'zustand'
 import { combine } from 'zustand/middleware'
-import { DEFAUlT_PRESET, initialActivePreset } from './presetURLs'
+import { initialActivePreset } from '@shadergradient/core'
+import { DEFAUlT_PRESET } from './presetURLs'
 
 // without embedMode
 // it renders without the dom & other gradient controls at first, and add it after the first updateGradientState() excuted.

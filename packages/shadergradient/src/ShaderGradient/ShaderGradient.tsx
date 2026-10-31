@@ -1,5 +1,5 @@
 import { GradientT } from '../types'
-import { presets } from '../presets'
+import { presets } from '@shadergradient/core'
 import { Mesh } from './Mesh'
 import { Lights } from './Lights'
 import { PostProcessing } from './PostProcessing'
@@ -10,7 +10,7 @@ import { Axis } from './Axis'
 
 export function ShaderGradient(passedProps: GradientT) {
   const { control, urlString, onCameraUpdate, ...rest } = {
-    ...presets.halo.props,
+    ...(presets.halo.props satisfies GradientT),
     ...passedProps,
   }
 

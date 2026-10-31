@@ -1,7 +1,7 @@
 import { Geometry } from './Geometry'
 import { MeshT } from '@/types'
 import { Materials } from './Materials'
-import * as shaders from '@/shaders'
+import { shaders } from '@shadergradient/core'
 
 import { dToRArr, colorToRgb } from '@/utils'
 import { debug } from '@/utils/debug'

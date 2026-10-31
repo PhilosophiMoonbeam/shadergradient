@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "proposedSvelteFloor": "5.40.0",
+  "advertisedBounds": {
+    "svelte": ">=5.40.0 <=5.57.3",
+    "@threlte/core": "8.6.1",
+    "three": "0.186.1"
+  },
+  "threePolicy": "Only passing exact pins are demonstrated. Shader-only r180 success cannot override the native addon/HDR floor. No continuous interval inferred.",
+  "cells": [
+    "p-s540-t800-r180/cell.json",
+    "p-s540-t800-r186/cell.json",
+    "p-s540-t861-r180/cell.json",
+    "p-s540-t861-r186/cell.json",
+    "p-s557-t800-r180/cell.json",
+    "p-s557-t800-r186/cell.json",
+    "p-s557-t861-r180/cell.json",
+    "p-s557-t861-r186/cell.json",
+    "kit-current/cell.json"
+  ],
+  "provenanceSources": [
+    "https://svelte.dev/docs/svelte/context",
+    "https://registry.npmjs.org/@sveltejs/kit/3.1.0",
+    "https://registry.npmjs.org/@threlte/core/8.0.0",
+    "https://registry.npmjs.org/@threlte/core/8.6.1",
+    "https://registry.npmjs.org/@sveltejs/vite-plugin-svelte/6.2.1"
+  ]
+}

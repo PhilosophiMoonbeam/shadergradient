@@ -17,7 +17,12 @@ concurrency:
 jobs:
   browser-tests:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 360
+    env:
+      CI: 'true'
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      # Chromium, Firefox and WebKit execute serially; do not shard GPU work.
+      PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
     steps:
       - uses: actions/checkout@v4
 
@@ -31,36 +36,56 @@ jobs:
             pnpm-lock.yaml
             apps/examples/example-vite-vue/pnpm-lock.yaml
             apps/examples/example-nuxtjs/pnpm-lock.yaml
+            apps/examples/example-vite-svelte/pnpm-lock.yaml
+            apps/examples/example-sveltekit/pnpm-lock.yaml
 
-      - name: Install dependencies
+      - name: Install frozen workspace dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Get Playwright version
+      - name: Provision Linux isolation and software GL prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y bubblewrap xvfb xauth x11-xserver-utils mesa-utils libgl1-mesa-dri
+          # Ubuntu 24.04 AppArmor restricts unprivileged user namespaces by
+          # default. This ephemeral runner must permit the actual F26 sandbox;
+          # failure is not replaced by a checkout-visible/source fallback.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          bwrap --die-with-parent --new-session --ro-bind / / --dev-bind /dev /dev --proc /proc --tmpfs "$GITHUB_WORKSPACE" -- /bin/sh -c 'test ! -e "$1/package.json"' sh "$GITHUB_WORKSPACE"
+
+      - name: Get installed Playwright version
         id: playwright-version
         run: node -p "'version=' + require('@playwright/test/package.json').version" >> "$GITHUB_OUTPUT"
 
-      - name: Cache Playwright Chromium
+      - name: Cache all three browser engines
         id: playwright-cache
         uses: actions/cache@v4
         with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ runner.arch }}-ubuntu-24.04-chromium-${{ steps.playwright-version.outputs.version }}
+          path: /home/runner/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ runner.arch }}-ubuntu-24.04-chromium-firefox-webkit-${{ steps.playwright-version.outputs.version }}-${{ hashFiles('pnpm-lock.yaml', 'apps/examples/example-vite-vue/pnpm-lock.yaml', 'apps/examples/example-nuxtjs/pnpm-lock.yaml', 'apps/examples/example-vite-svelte/pnpm-lock.yaml', 'apps/examples/example-sveltekit/pnpm-lock.yaml') }}
 
-      - name: Install Chromium system dependencies
-        run: pnpm exec playwright install-deps chromium
+      # System packages are required even when browser binaries hit the cache.
+      - name: Install all browser system dependencies
+        run: pnpm exec playwright install-deps chromium firefox webkit
 
-      - name: Install Chromium
+      - name: Install all browser binaries on cold cache
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install chromium
+        run: pnpm exec playwright install chromium firefox webkit
 
-      - name: Run browser tests
-        run: pnpm test:e2e
+      - name: Run single integrated preparation and browser matrix
+        # The qualified 820x1180 CSS / DSF1.5 Firefox touch viewport needs an
+        # adequate screen. xvfb-run supplies the real DISPLAY; never pin :197.
+        # test:e2e already prepares/contracts/types/verifies fresh packages once.
+        run: xvfb-run -a -s '-screen 0 2560x2160x24 -nolisten tcp' pnpm test:e2e
 
-      - name: Upload failure screenshots and traces
-        if: ${{ !cancelled() }}
+      - name: Upload engine/consumer reports and failure evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-results
-          path: test-results/
+          name: playwright-${{ runner.os }}-${{ runner.arch }}-${{ github.run_attempt }}
+          path: |
+            test-results/
+            playwright-report/
+            e2e-results/
           if-no-files-found: ignore
           retention-days: 14
+          compression-level: 6

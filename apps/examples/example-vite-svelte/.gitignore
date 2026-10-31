@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.vite/
+.svelte-kit/
+*.tgz
+*.tsbuildinfo
+.DS_Store

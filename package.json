@@ -12,13 +12,19 @@
     "clean": "turbo run clean",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prepare:e2e": "node tests/browser/prepare.mjs",
-    "test:e2e": "node tests/browser/prepare.mjs && playwright test",
+    "test:e2e": "node tests/browser/prepare.mjs --test",
+    "test:e2e:native": "node tests/browser/prepare.mjs --test --native",
+    "test:e2e:legacy": "node tests/browser/prepare.mjs --test --legacy",
+    "test:svelte:contracts": "node --test tests/svelte/contracts/*.test.mjs",
+    "test:svelte:types": "node tests/svelte/types/run.mjs",
+    "test:svelte:packages": "node tests/svelte/package-consumers.mjs",
     "changeset": "changeset add",
     "version-packages": "changeset version",
-    "release": "turbo run build --filter=@shadergradient/react --filter=@shadergradient/vue && changeset publish"
+    "release": "turbo run build --filter=@shadergradient/core --filter=@shadergradient/react --filter=@shadergradient/vue --filter=@shadergradient/svelte && changeset publish"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
+    "@playwright/test": "1.63.0",
+    "@shadergradient/core": "workspace:*",
     "pngjs": "^7.0.0",
     "@changesets/cli": "^2.26.1",
     "eslint": "^7.32.0",
@@ -30,7 +36,7 @@
   },
   "packageManager": "pnpm@10.12.4",
   "engines": {
-    "node": ">=14.0.0",
+    "node": "^22.19.0 || ^24.11.0 || >=26.0.0",
     "pnpm": ">=10.2.1"
   },
   "version": "0.0.1"

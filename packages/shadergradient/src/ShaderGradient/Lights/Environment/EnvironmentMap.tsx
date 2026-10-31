@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import { useThree } from '@react-three/fiber'
 import { useRGBELoader } from './useRGBELoader'
 import { useShaderGradientCanvasContext } from '@/ShaderGradientCanvas'
-import { defaultEnvBasePath } from '@/consts'
+import { defaultEnvBasePath } from '@shadergradient/core'
 
 type Props = {
   background?: boolean | 'only'
