@@ -68,6 +68,10 @@ Vite with `--force` after rebuilding a linked SDK to invalidate optimized linked
 dependencies; do not diagnose stale optimized output as current package behavior.
 Run initial builds before starting watchers. Stop only the processes you own.
 
+Generated `.svelte-kit/` directories and `e2e-results/` are ignored. Keep these
+local build caches and test artifacts out of source commits; preserve any
+qualification evidence separately rather than committing generated output.
+
 Consumer imports must come from `@shadergradient/svelte`; framework-neutral
 shaders, presets, constants and types come from `@shadergradient/core` where
 exported. Both packages expose the public `.` entry. Do not introduce source
