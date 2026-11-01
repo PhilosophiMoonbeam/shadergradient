@@ -76,6 +76,12 @@ varying vec3 color1;
 varying vec3 color2;
 varying vec3 color3;
 varying float distanceToCenter;
+
+float linearToRelativeLuminance2( const in vec3 color ) {
+    vec3 weights = vec3( 0.2126, 0.7152, 0.0722 );
+    return dot( weights, color.rgb );
+}
+
 void main() {
   //-------- basic gradient ------------
   vec3 color1 = vec3(uC1r, uC1g, uC1b);
@@ -125,7 +131,7 @@ void main() {
 #ifdef TRANSMISSION
   diffuseColor.a *=
       mix(saturate(1. - totalTransmission +
-                   linearToRelativeLuminance(reflectedLight.directSpecular +
+                   linearToRelativeLuminance2(reflectedLight.directSpecular +
                                              reflectedLight.indirectSpecular)),
           1.0, metalness);
 #endif

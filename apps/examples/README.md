@@ -27,10 +27,56 @@ Once the Vue package is published, replace the local tarball dependencies with a
 actual published version and regenerate each starter's lockfile. These examples
 must not depend on `workspace:*` packages or shared monorepo ESLint configuration.
 
-For active library development, use `apps/example-vue-dev` or
-`apps/example-nuxtjs-dev` instead. Those apps deliberately consume the local
-workspace build. The standalone starters consume a snapshot of the packaged output
-and need repacking and reinstallation after library changes.
+For active library development, use the six workspace studios below. They
+deliberately consume local public SDK builds. The independent starters above
+consume packaged snapshots and need repacking and reinstallation after library
+changes; this studio workflow does not change their dependencies or qualification.
+
+## Linked workspace studios (not these starters)
+
+From the repository root, use the supported Node/pnpm versions below and prepare
+the public SDK outputs:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm --filter @shadergradient/core build
+pnpm --filter @shadergradient/react build
+pnpm --filter @shadergradient/vue build
+pnpm --filter @shadergradient/svelte build
+```
+
+Run each desired server in a separate terminal:
+
+| Workspace studio | Root command | URL |
+| --- | --- | --- |
+| React Color Studio | `pnpm --filter example-react-dev dev --host 127.0.0.1 --port 3009 --strictPort` | `http://127.0.0.1:3009/` |
+| Native Composition Studio | `pnpm --filter example-svelte-dev dev --port 3110 --strictPort` | `http://127.0.0.1:3110/` |
+| SvelteKit Page & Light | `pnpm --filter example-sveltekit-dev dev --host 127.0.0.1 --port 3111 --strictPort` | `http://127.0.0.1:3111/` |
+| Vue Palette Studio | `pnpm --filter example-vue-dev dev --host 127.0.0.1 --strictPort` | `http://127.0.0.1:3005/` |
+| Nuxt Scene Journal | `pnpm --filter example-nuxtjs-dev dev --host 127.0.0.1` | `http://127.0.0.1:3006/` |
+| Next Glass Studio | `pnpm --filter example-nextjs-dev dev --hostname 127.0.0.1` | `http://127.0.0.1:3004/` |
+
+Next also serves Canvas Study at `/customize-simple` and Time Study at `/loop`.
+The React workspace is the React 18.3.1 / Fiber 8.18.0 / Three 0.169.0 public
+SDK lane, not the older standalone React 19/registry example. A workspace
+build does not establish independent packed installation or npm availability.
+
+See [the six-studio contributor workflow](../../CONTRIBUTING-SVELTE.md#six-workspace-studios)
+for each app's build/check commands and observation checklist: all ten complete
+Core presets and full settings, native completed-frame Source/View mirrors
+versus independent Canvas/host ownership, meaningful Kit/Nuxt SSR fallback and
+navigation, and Next's actual camera/resolution and shader-time studies.
+Glass needs opaque Three scene content and real HDR/environment light, not a
+CSS backdrop. Inspect reduced motion, paused edits, loading/error/context-loss
+states, keyboard controls and mobile layouts rather than treating a canvas
+element as proof of rendered output.
+
+`apps/demo-studio.css` shares presentation only among workspace demos; it is not
+an SDK export and is not required by these independent starters. App-only styling
+needs no SDK Changeset; the prior SDK glass Changeset retains its own scope.
+These reproduction instructions make no full release, F31, cross-engine or
+performance qualification claim. Keep existing failure evidence and run the
+single-preparation full browser gate described in the contributor guide.
 
 ## Native Svelte starters
 

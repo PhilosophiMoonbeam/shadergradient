@@ -81,6 +81,136 @@ public implementation to make a consumer pass. Native's `types`, `svelte` and
 raw Node parsing uncompiled `.svelte` files is not a native SSR qualification.
 Compile native SSR through the actual Svelte toolchain and keep Kit SSR enabled.
 
+### Six workspace studios
+
+These are linked development apps, not the independent packed starters in
+`apps/examples/*`. Run commands from the repository root after the install above.
+Build the public packages first; none of these commands requires publishing:
+
+```sh
+pnpm --filter @shadergradient/core build
+pnpm --filter @shadergradient/react build
+pnpm --filter @shadergradient/vue build
+pnpm --filter @shadergradient/svelte build
+```
+
+Start each desired app in its own terminal. Explicit Vite ports and strict-port
+mode make the URLs reproducible instead of silently choosing another port:
+
+| Studio | Root command | Local URL |
+| --- | --- | --- |
+| React Color Studio | `pnpm --filter example-react-dev dev --host 127.0.0.1 --port 3009 --strictPort` | `http://127.0.0.1:3009/` |
+| Native Composition Studio | `pnpm --filter example-svelte-dev dev --port 3110 --strictPort` | `http://127.0.0.1:3110/` |
+| SvelteKit Page & Light | `pnpm --filter example-sveltekit-dev dev --host 127.0.0.1 --port 3111 --strictPort` | `http://127.0.0.1:3111/` |
+| Vue Palette Studio | `pnpm --filter example-vue-dev dev --host 127.0.0.1 --strictPort` | `http://127.0.0.1:3005/` |
+| Nuxt Scene Journal | `pnpm --filter example-nuxtjs-dev dev --host 127.0.0.1` | `http://127.0.0.1:3006/` |
+| Next Glass Studio | `pnpm --filter example-nextjs-dev dev --hostname 127.0.0.1` | `http://127.0.0.1:3004/` |
+
+Next's companion routes use the same server: Canvas Study is
+`http://127.0.0.1:3004/customize-simple`; Time Study is
+`http://127.0.0.1:3004/loop`. Keep the approved root Glass Studio distinct from
+these focused studies. If a fixed port is occupied, stop only your own server
+or resolve the conflict rather than treating another process as this app.
+
+The new React workspace app uses public `@shadergradient/react`, React 18.3.1,
+Fiber 8.18.0 and Three 0.169.0; it is not the older standalone React 19/registry
+example. SDK changes require rebuilding the relevant public package (core first
+when changed). Vite consumers can be restarted with `--force` to clear optimized
+linked dependencies. For production compiler checks, run:
+
+```sh
+pnpm --filter example-react-dev typecheck
+pnpm --filter example-react-dev build
+pnpm --filter example-svelte-dev check
+pnpm --filter example-svelte-dev build
+pnpm --filter example-sveltekit-dev check
+pnpm --filter example-sveltekit-dev build
+pnpm --filter example-vue-dev build
+pnpm --filter example-nuxtjs-dev typecheck
+pnpm --filter example-nuxtjs-dev build
+pnpm --filter example-nextjs-dev build
+```
+
+These are reproduction commands, not a claim that every build or browser gate
+passes on the current candidate. Preserve the scoped legacy failures below.
+
+#### What to observe
+
+- React Color Studio and Vue Palette Studio foreground complete Core presets
+  and live material/palette controls. Native Composition Studio adds real
+  Threlte composition and ownership diagnostics. Exercise all ten presets and
+  the four shader families across three geometries in their full-settings
+  controls; a preset includes camera, geometry, lighting/HDR, grain and motion,
+  not just three colors. An edited or recommended glass study is a remix, not
+  evidence of an unchanged preset.
+- Native Source/View surfaces mirror **completed frames** from one producer.
+  Compare wide/tall cover crops and resize a paused View; copies must settle
+  without a second scene renderer. Independent Canvases own separate contexts,
+  while the external-mode host owns camera, lighting, renderer and effects.
+  These are different composition contracts, not interchangeable preview tiles.
+- SvelteKit Page & Light and Nuxt Scene Journal keep meaningful editorial
+  content and fallback markup in SSR. Inspect the response before JavaScript,
+  then hydrate, change presets and navigate away/back. Keep Kit's existing
+  request-specific isolation and native fixture paths intact; a mounted canvas
+  alone does not establish hydration, navigation or rendered-pixel correctness.
+- Next Canvas Study isolates camera, pixel density, surface/light and range
+  tradeoffs. Time Study compares SDK looping with bounded shader-time ranges:
+  a range wraps endpoints, while only applicable shader sampling is seamless.
+  Observe actual material time and motion, not a decorative progress clock.
+- Glass needs real opaque Three scene content behind the subject and actual
+  HDR/environment lighting to judge refraction and highlights. A CSS backdrop
+  is insufficient. Sphere is a closed volume; plane/water plane are sheets.
+  Wait for HDR completion and compare with the unobstructed scene; do not infer
+  pixel equivalence between the React r169 and native/Vue r186 lanes.
+- Check reduced-motion startup, explicit play/pause and edits while paused.
+  One-shot prop/resize/HDR redraws are expected while time animation is stopped.
+  Keep initializing, loading, ready and failure states honest; inspect actual
+  frames, HDR failures and context-loss recovery rather than equating a DOM
+  canvas with WebGL success. Check keyboard controls, 390px layouts and both
+  browser color schemes as well as desktop.
+- Vue and Nuxt retain the SDK's offscreen teardown: moving the preview out of
+  view releases its context, and returning creates a fresh canvas. Pause is
+  beside the preview, not at the end of the editing desk. Vue reseeds its
+  declared initial time after lazy recreation; Nuxt retains the captured paused
+  phase. Neither reports an offscreen palette fallback as a live WebGL scene.
+  Applying a complete preset replaces a captured phase with that preset's seek;
+  merely leaving and returning must not customize its camera or selection.
+  Vue publishes its paused camera pose at the existing loop's idle boundary,
+  which can precede CameraControls' rest event. Equivalent rest values use a
+  `1e-6` numeric tolerance and modulo-360 azimuth comparison; polar angles use
+  `1e-4` degrees to include Three's supported pole clamp. Real camera edits are
+  variations, while reset restores the Core preset state without a render loop.
+- Native Pause/Resume and Kit's individual controls edit the winning query
+  parameter when typed query mode is active. Full URLs, paths, bare queries and
+  fragments follow the SDK's URL syntax; unrelated camera, range and seek values
+  remain in the query.
+
+`apps/demo-studio.css` is shared **app presentation only**, imported directly by
+workspace studios; it is not an SDK export or a dependency of the independent
+starters. App-only styling does not need an SDK Changeset. The prior SDK glass
+Changeset has its own material-behavior scope and must not be broadened to imply
+that styling changes publish SDK code.
+
+`apps/demo-query.ts` only extracts and edits demo query text. It does not validate
+or resolve SDK settings, and consumers must not import private SDK source.
+The independent full-feature qualification copies relocate these app-only files
+inside each consumer root. Both files participate in preparation identity;
+checkout-denied builds must not reach back into workspace apps. SDK packages and
+the original standalone starters do not depend on this presentation layer.
+
+The same root controller installs legacy Vue/Nuxt starters in its owned temporary
+namespace using fresh local SDK tarballs and verifies exact JavaScript/declaration
+bytes. It does not trust an older starter `node_modules`, mutate the original
+starter manifests, or refresh unrelated dependency versions.
+
+The browser matrix names the React workspace projects `react-studio` and
+`react-studio-mobile`. Their managed integration server uses port 3109; the
+explicit external development command above uses 3009. They cover the workspace
+app, not independent packed React installation. The full `pnpm test:e2e` remains the single preparation
+owner described below; do not prepend another preparation or infer complete
+cross-engine, performance, zero-error or F31 release qualification from a
+targeted studio check.
+
 ## Ownership and runtime invariants
 
 Preserve these contracts when changing implementation or examples:
@@ -198,6 +328,51 @@ native entry point. Use `pnpm test:e2e:native` for the native subset or
 `pnpm prepare:e2e`; reuse requires an unchanged validated manifest, not a bypass
 of the guard. These subsets are not substitutes for the full final gate.
 
+### Independent visual inspection
+
+Use an isolated, named `playwright-cli` session to inspect real screenshots,
+console diagnostics and asset responses. A canvas element or scene object is
+not proof that its GPU program linked or that its output is correct. Preserve
+failed captures and shader compiler logs before making a repair.
+
+For a cross-framework comparison, freeze the complete Core preset, its declared
+`uTime`, camera, shader, geometry, lighting and grain settings. Match the canvas
+raster, DPR and backdrop; wait for actual completed frames and selected HDR
+readiness. The playground's grain-blending control is an explicit override:
+match it to the reference before judging noise differences. Record the actual
+Three revision, output color space, GPU backend and uniforms beside each image.
+Do not assume cross-revision PBR or glass output is pixel-identical.
+
+Check responsive layouts as well as desktop canvases. Flex items containing a
+canvas may need `min-w-0` to shrink below its intrinsic width; verify the Next
+Glass Studio viewport and full-width controls remain usable without overflow.
+Check light and dark browser color preferences too. Pair explicit backgrounds
+with explicit foregrounds so inherited body theme colors cannot erase headings
+or inactive controls; measure text contrast rather than inferring it from a
+successful canvas draw.
+
+Glass qualification requires actual opaque Three scene content behind the
+subject and a real environment, not only a CSS background or a linked GPU
+program. Verify recognizable refraction against an unobstructed-scene comparison
+and environment highlights for all three shapes. Keep the camera, material and
+paused time stable across comparison and view-only reset controls. The SDK glass
+path uses opacity/transmission `1`, linear normalized tint vectors and
+`roughness = 1 - reflection`; non-glass color conventions remain unchanged.
+
+The Next studio and React SDK development lane share Fiber `8.18.0` with React
+18 / Three r169; the other scene lane remains Three r186. Workspace
+`packageExtensions` bind missing `@types/three` peers to each consumer's own
+revision, preventing legacy declarations from leaking into Threlte/Tres.
+Do not replace this isolation with type casts or a global Three upgrade.
+For Source/View, verify the actual completed-frame crop oracle and wait for
+ResizeObserver/copy settlement after resizing a paused view, not just a Svelte
+tick. Bulk image judgments require a frozen rubric and direct adjudication of
+flagged frames; they do not replace execution.
+
+Targeted inspection and repair checks do not renew the frozen full release
+qualification. Run the final gates on one unchanged repaired candidate before
+publication or claiming release readiness.
+
 ### Performance characterization
 
 `tests/svelte/performance.mjs` consumes an actual retained F26 preparation
@@ -308,7 +483,7 @@ both packages; they are not a promise that these versions exist remotely.
 
 ## Observed support, limitations and evidence ownership
 
-The current pre-final local qualification recorded 34 browser projects, 1,808
+The pre-repair local qualification baseline recorded 34 browser projects, 1,808
 rows: 1,684 passes and 124 adjudicated applicability skips, with zero unexpected,
 flaky, unexecuted or unknown outcomes. All four outside-workspace packed
 lower/current plain/Kit consumers passed runtime and SSR/type gates. This is a

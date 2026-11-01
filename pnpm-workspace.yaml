@@ -6,3 +6,31 @@ onlyBuiltDependencies:
   - esbuild
   - framer
   - unrs-resolver
+
+# Bind declarations to each consumer's Three revision instead of the workspace
+# hoist. React uses r169; native Svelte and Vue use r186.
+packageExtensions:
+  '@threlte/core@8':
+    peerDependencies:
+      '@types/three': '*'
+    peerDependenciesMeta:
+      '@types/three':
+        optional: true
+  '@tresjs/core@5':
+    peerDependencies:
+      '@types/three': '*'
+    peerDependenciesMeta:
+      '@types/three':
+        optional: true
+  'camera-controls@2':
+    peerDependencies:
+      '@types/three': '*'
+    peerDependenciesMeta:
+      '@types/three':
+        optional: true
+  '@react-three/fiber@8':
+    peerDependencies:
+      '@types/three': '*'
+    peerDependenciesMeta:
+      '@types/three':
+        optional: true

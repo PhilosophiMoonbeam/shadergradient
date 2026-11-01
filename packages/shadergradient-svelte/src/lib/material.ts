@@ -4,7 +4,6 @@ import {
   DoubleSide,
   LinearSRGBColorSpace,
   MeshPhysicalMaterial,
-  Vector2,
   Vector3,
   type Texture,
 } from 'three'
@@ -14,64 +13,23 @@ import type {
   ResolvedExternalSettings,
 } from './types.js'
 
-function adaptGlassFragment(source: string): string {
-  // Physical materials use PMREM's CubeUV atlas, not the legacy cube sampler.
-  // The generic envmap chunk also redeclares this shader's reflectivity/vReflect.
-  return source
-    .replaceAll('#ifdef ENVMAP_TYPE_CUBE\n', '#ifdef USE_ENVMAP\n')
-    .replaceAll('textureCube(envMap, ', 'shaderGradientEnvironment(')
-    .replace('#include <envmap_pars_fragment>', '')
-    .replace(
-      '#include <envmap_physical_pars_fragment>',
-      `#include <cube_uv_reflection_fragment>
-#include <envmap_physical_pars_fragment>
-
-#ifdef USE_ENVMAP
-vec4 shaderGradientEnvironment(vec3 direction) {
-  #ifdef ENVMAP_TYPE_CUBE_UV
-  return textureCubeUV(envMap, envMapRotation * direction, roughness);
-  #else
-  return textureCube(envMap, envMapRotation * direction);
-  #endif
-}
-#endif`
-    )
-    .replace(
-      'vec3 chromaticRefraction(vec3 viewDirection, vec3 normal, float ior, float chromaticStrength) {',
-      `vec3 chromaticRefraction(vec3 viewDirection, vec3 normal, float ior, float chromaticStrength) {
-  viewDirection = transformDirectionByInverseViewMatrix(viewDirection, viewMatrix);
-  normal = transformNormalByInverseViewMatrix(normal, viewMatrix);`
-    )
-}
-
 export function createMaterial(
   settings: ResolvedExternalSettings
 ): MaterialHandle {
   const glass = settings.shader === 'glass'
   const variant = `${settings.shader}:${settings.type}`
   const source = shaders[settings.shader][settings.type]
-  const vertexShader = compatibleShader(
-    glass && settings.type === 'waterPlane'
-      ? source.vertex.replace(
-          'vWaveNormal = waveNormal;',
-          'vWaveNormal = normalize(normalMatrix * waveNormal);'
-        )
-      : source.vertex
-  )
-  const fragmentShader = compatibleShader(
-    glass ? adaptGlassFragment(source.fragment) : source.fragment
-  )
+  const vertexShader = compatibleShader(source.vertex)
+  const fragmentShader = compatibleShader(source.fragment)
   const material = new MeshPhysicalMaterial({
     side: DoubleSide,
     metalness: glass ? 0 : 0.2,
     ...(glass
       ? {
-          transparent: true,
-          opacity: 0.3,
-          transmission: 0.9,
-          thickness: 0.5,
-          clearcoat: 1,
-          clearcoatRoughness: 0,
+          transparent: false,
+          opacity: 1,
+          transmission: 1,
+          thickness: 0.6,
           ior: 1.5,
         }
       : {}),
@@ -99,18 +57,6 @@ export function createMaterial(
     uColor2: { value: new Vector3() },
     uColor3: { value: new Vector3() },
     uIntensity: { value: 0.5 },
-    uTransparency: { value: 0.1 },
-    uRefraction: { value: 1.5 },
-    uChromaticAberration: { value: 0.1 },
-    uFresnelPower: { value: 2 },
-    uReflectivity: { value: 0.9 },
-    uWaveAmplitude: { value: 0.02 },
-    uWaveFrequency: { value: 5 },
-    uDistortion: { value: 0.1 },
-    uFlowSpeed: { value: 0.1 },
-    uFlowDirection: { value: new Vector2(1, 0.5) },
-    uLiquidEffect: { value: 0.5 },
-    uFoamIntensity: { value: 0.3 },
   }
   const color = new Color()
   let disposed = false
@@ -181,21 +127,24 @@ export function createMaterial(
     uniforms.uC1r.value = color.r
     uniforms.uC1g.value = color.g
     uniforms.uC1b.value = color.b
+    if (glass) color.convertSRGBToLinear()
     uniforms.uColor1.value.set(color.r, color.g, color.b)
 
     setColor(next.color2)
     uniforms.uC2r.value = color.r
     uniforms.uC2g.value = color.g
     uniforms.uC2b.value = color.b
+    if (glass) color.convertSRGBToLinear()
     uniforms.uColor2.value.set(color.r, color.g, color.b)
 
     setColor(next.color3)
     uniforms.uC3r.value = color.r
     uniforms.uC3g.value = color.g
     uniforms.uC3b.value = color.b
+    if (glass) color.convertSRGBToLinear()
     uniforms.uColor3.value.set(color.r, color.g, color.b)
 
-    material.roughness = glass ? 0.1 : 1 - next.reflection
+    material.roughness = 1 - next.reflection
     material.wireframe = next.wireframe
     // Animation owns elapsed time; visual updates must not reset uTime.
   }

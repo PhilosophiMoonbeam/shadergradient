@@ -1,10 +1,16 @@
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { colorToRgb, formatColor } from '@/utils'
 import { useFrame } from '@react-three/fiber'
 
-// Define the material component
-export const Materials = ({
+export const Materials = (props) =>
+  props.shader === 'glass' ? (
+    <GlassMaterials {...props} />
+  ) : (
+    <GradientMaterials {...props} />
+  )
+
+const GradientMaterials = ({
   animate,
   range,
   rangeStart,
@@ -16,9 +22,7 @@ export const Materials = ({
   vertexShader,
   fragmentShader,
   onInit,
-  shader,
 }) => {
-  const localClockRef = useRef(new THREE.Clock())
   const material = useMemo(() => {
     const entries = Object.entries(uniforms)
     const colors = uniforms.colors
@@ -45,14 +49,11 @@ export const Materials = ({
       }
     }, {})
 
-    // Material configuration based on shader type
+    // Keep the existing scalar-gradient shader path unchanged.
     const materialConfig: THREE.MeshPhysicalMaterialParameters = {
       userData: uniformValues, // sync uniform and userData to update uniforms from outside (MeshPhysicalMaterial)
-      metalness: shader === 'glass' ? 0.0 : 0.2,
-      roughness:
-        shader === 'glass'
-          ? 0.1
-          : 1 - (typeof reflection === 'number' ? reflection : 0.1),
+      metalness: 0.2,
+      roughness: 1 - (typeof reflection === 'number' ? reflection : 0.1),
       side: THREE.DoubleSide,
       onBeforeCompile: (shader) => {
         shader.uniforms = {
@@ -66,18 +67,6 @@ export const Materials = ({
       // wireframe: true,
     }
 
-    // Add glass-specific material properties
-    if (shader === 'glass') {
-      materialConfig.transparent = true
-      materialConfig.opacity = 0.3
-      materialConfig.transmission = 0.9
-      materialConfig.thickness = 0.5
-      materialConfig.clearcoat = 1.0
-      materialConfig.clearcoatRoughness = 0.0
-      materialConfig.ior = 1.5
-      materialConfig.envMapIntensity = 1.0
-    }
-
     const material = new THREE.MeshPhysicalMaterial(materialConfig)
 
     entries.forEach(([name]) =>
@@ -89,13 +78,115 @@ export const Materials = ({
 
     if (onInit) onInit(material)
     return material
-  }, [uniforms, vertexShader, fragmentShader, onInit, reflection, shader])
+  }, [uniforms, vertexShader, fragmentShader, onInit, reflection])
 
   useEffect(() => {
     return () => {
       material.dispose()
     }
   }, [material])
+
+  useTimeAnimation(material, {
+    animate,
+    range,
+    rangeStart,
+    rangeEnd,
+    loop,
+    loopDuration,
+  })
+  return <primitive attach='material' object={material} />
+}
+
+function GlassMaterials({
+  animate,
+  range,
+  rangeStart,
+  rangeEnd,
+  loop,
+  loopDuration,
+  reflection,
+  uniforms,
+  vertexShader,
+  fragmentShader,
+  onInit,
+}) {
+  const material = useMemo(() => {
+    const values = {
+      uTime: { value: 0 },
+      uSpeed: { value: 0 },
+      uNoiseDensity: { value: 1 },
+      uNoiseStrength: { value: 0 },
+      uLoop: { value: 0 },
+      uLoopDuration: { value: 5 },
+      uColor1: { value: new THREE.Vector3() },
+      uColor2: { value: new THREE.Vector3() },
+      uColor3: { value: new THREE.Vector3() },
+    }
+    const result = new THREE.MeshPhysicalMaterial({
+      metalness: 0,
+      roughness: 0.08,
+      side: THREE.DoubleSide,
+      transparent: false,
+      opacity: 1,
+      transmission: 1,
+      thickness: 0.6,
+      ior: 1.5,
+    })
+    result.userData = values
+    result.onBeforeCompile = (compiled) => {
+      Object.assign(compiled.uniforms, values)
+      compiled.vertexShader = vertexShader
+      compiled.fragmentShader = fragmentShader
+    }
+    const programKey = vertexShader + fragmentShader
+    result.customProgramCacheKey = () => programKey
+    return result
+  }, [vertexShader, fragmentShader])
+  const color = useMemo(() => new THREE.Color(), [])
+
+  useLayoutEffect(() => {
+    const values = material.userData
+    values.uSpeed.value = uniforms.uSpeed
+    values.uNoiseDensity.value = uniforms.uNoiseDensity
+    values.uNoiseStrength.value = uniforms.uNoiseStrength
+    values.uLoop.value = uniforms.uLoop
+    values.uLoopDuration.value = uniforms.uLoopDuration
+    // Color parses CSS into linear, normalized channels; scalar gradients above
+    // intentionally retain their original formatColor channel convention.
+    color.setStyle(uniforms.colors[0])
+    values.uColor1.value.set(color.r, color.g, color.b)
+    color.setStyle(uniforms.colors[1])
+    values.uColor2.value.set(color.r, color.g, color.b)
+    color.setStyle(uniforms.colors[2])
+    values.uColor3.value.set(color.r, color.g, color.b)
+    material.roughness = 1 - (typeof reflection === 'number' ? reflection : 0.1)
+  }, [material, uniforms, reflection, color])
+
+  useLayoutEffect(() => {
+    material.userData.uTime.value = uniforms.uTime
+  }, [material, uniforms.uTime])
+
+  useEffect(() => {
+    onInit?.(material)
+  }, [material, onInit])
+  useEffect(() => () => material.dispose(), [material])
+  useTimeAnimation(material, {
+    animate,
+    range,
+    rangeStart,
+    rangeEnd,
+    loop,
+    loopDuration,
+  })
+  return <primitive attach='material' object={material} />
+}
+
+function useTimeAnimation(
+  material,
+  { animate, range, rangeStart, rangeEnd, loop, loopDuration }
+) {
+  const localClockRef = useRef<THREE.Clock | null>(null)
+  if (localClockRef.current === null) localClockRef.current = new THREE.Clock()
 
   // Sync clock with animate/range changes similar to v1's useTimeAnimation
   useEffect(() => {
@@ -148,6 +239,4 @@ export const Materials = ({
       material.userData.uTime.value = elapsed
     }
   })
-
-  return <primitive attach='material' object={material} />
 }

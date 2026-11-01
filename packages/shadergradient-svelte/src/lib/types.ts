@@ -10,7 +10,6 @@ import type {
   MeshPhysicalMaterial,
   PerspectiveCamera,
   Scene,
-  Vector2,
   Vector3,
   WebGLRenderer,
 } from 'three'
@@ -351,18 +350,6 @@ export interface GradientUniforms {
   uColor2: IUniform<Vector3>
   uColor3: IUniform<Vector3>
   uIntensity: IUniform<number>
-  uTransparency: IUniform<number>
-  uRefraction: IUniform<number>
-  uChromaticAberration: IUniform<number>
-  uFresnelPower: IUniform<number>
-  uReflectivity: IUniform<number>
-  uWaveAmplitude: IUniform<number>
-  uWaveFrequency: IUniform<number>
-  uDistortion: IUniform<number>
-  uFlowSpeed: IUniform<number>
-  uFlowDirection: IUniform<Vector2>
-  uLiquidEffect: IUniform<number>
-  uFoamIntensity: IUniform<number>
 }
 export interface MaterialHandle {
   readonly material: MeshPhysicalMaterial

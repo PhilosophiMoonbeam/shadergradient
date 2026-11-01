@@ -6,12 +6,44 @@ const useDevServers = process.env.E2E_USE_DEV_SERVERS === '1'
 const scope = process.env.E2E_SCOPE ?? 'all'
 const nativeSpecs = /svelte-(?:features|lifecycle|mirrors)\.spec\.ts$/
 const legacySpecs = /(?:gradient|coverage)\.spec\.ts$/
+const demoStudioSpecs = /demo-studio\.spec\.ts$/
 const apps = [
-  { name: 'vue-library', port: 3105, integrationServer: 'vue-dev' },
-  { name: 'vue-dev', port: 3105, integrationServer: 'vue-dev' },
-  { name: 'nuxt-dev', port: 3106, integrationServer: 'nuxt-dev' },
-  { name: 'vue-standalone', port: 3107, integrationServer: 'vue-standalone' },
-  { name: 'nuxt-standalone', port: 3108, integrationServer: 'nuxt-standalone' },
+  {
+    name: 'vue-library',
+    port: 3105,
+    integrationServer: 'vue-dev',
+    testMatch: legacySpecs,
+  },
+  {
+    name: 'vue-dev',
+    port: 3105,
+    integrationServer: 'vue-dev',
+    testMatch: legacySpecs,
+  },
+  {
+    name: 'nuxt-dev',
+    port: 3106,
+    integrationServer: 'nuxt-dev',
+    testMatch: legacySpecs,
+  },
+  {
+    name: 'vue-standalone',
+    port: 3107,
+    integrationServer: 'vue-standalone',
+    testMatch: legacySpecs,
+  },
+  {
+    name: 'nuxt-standalone',
+    port: 3108,
+    integrationServer: 'nuxt-standalone',
+    testMatch: legacySpecs,
+  },
+  {
+    name: 'react-studio',
+    port: 3109,
+    integrationServer: 'react-studio',
+    testMatch: demoStudioSpecs,
+  },
 ]
 
 // The root supervisor runs compiler fixtures, packs/installs and F26 runtime
@@ -28,10 +60,10 @@ if (
 const projects: NonNullable<PlaywrightTestConfig['projects']> = []
 if (scope !== 'native') {
   projects.push(
-    ...apps.flatMap(({ name, port, integrationServer }) => [
+    ...apps.flatMap(({ name, port, integrationServer, testMatch }) => [
       {
         name,
-        testMatch: legacySpecs,
+        testMatch,
         testIgnore: nativeSpecs,
         metadata: { integrationServer },
         use: {
@@ -43,7 +75,7 @@ if (scope !== 'native') {
       },
       {
         name: `${name}-mobile`,
-        testMatch: legacySpecs,
+        testMatch,
         testIgnore: nativeSpecs,
         metadata: { integrationServer },
         use: {

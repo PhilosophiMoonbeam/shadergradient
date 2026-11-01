@@ -97,10 +97,11 @@ export const ShaderGradient = defineComponent({
     group.add(mesh, ambient, axes)
     const materialVersion = ref(0)
     const environmentReady = ref(false)
+    const tintColor = new THREE.Color()
 
     watch(
-      () => props.value.type,
-      (type) => {
+      [() => props.value.type, () => props.value.shader === 'glass'],
+      ([type, glass]) => {
         const previous = mesh.geometry
         mesh.geometry =
           type === 'sphere'
@@ -108,7 +109,7 @@ export const ShaderGradient = defineComponent({
             : new THREE.PlaneGeometry(
                 10,
                 10,
-                type === 'waterPlane' ? 192 : 1,
+                type === 'waterPlane' || glass ? 192 : 1,
                 192
               )
         previous.dispose()
@@ -116,10 +117,10 @@ export const ShaderGradient = defineComponent({
       { immediate: true }
     )
     watch(
-      () => [props.value.type, props.value.shader],
+      [() => props.value.type, () => props.value.shader],
       () => {
         const previous = mesh.material
-        mesh.material = createMaterial(props.value)
+        mesh.material = createMaterial(props.value, tintColor)
         previous.dispose()
         materialVersion.value++
       },
@@ -128,7 +129,7 @@ export const ShaderGradient = defineComponent({
     watchEffect(() => {
       void materialVersion.value
       const settings = props.value
-      updateMaterial(mesh.material, settings)
+      updateMaterial(mesh.material, settings, tintColor)
       mesh.position.set(
         settings.positionX,
         settings.positionY,

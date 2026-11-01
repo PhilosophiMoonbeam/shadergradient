@@ -295,6 +295,8 @@ async function inputIdentity(cancellation) {
     'package.json',
     'pnpm-lock.yaml',
     'pnpm-workspace.yaml',
+    'apps/demo-studio.css',
+    'apps/demo-query.ts',
     'tests/svelte/package-consumers.mjs',
   ]) {
     inputs.push({ path, sha256: sha(await readFile(join(checkout, path))) })
@@ -1350,6 +1352,37 @@ async function prepareCell(ctx, spec, packages, typesRoot) {
     join(cell.root, 'src'),
     cancellation
   )
+  // Feature sources share app-only presentation files outside each workspace
+  // app. Relocate those files inside this independently installed consumer;
+  // checkout denial must remain effective during compilation and runtime.
+  for (const name of ['demo-studio.css', 'demo-query.ts']) {
+    await writeFile(
+      join(cell.root, 'src', name),
+      await readFile(join(checkout, 'apps', name))
+    )
+  }
+  const presentationImports =
+    spec.kind === 'plain'
+      ? {
+          'App.svelte': { '../../demo-query': './demo-query' },
+          'style.css': { '../../demo-studio.css': './demo-studio.css' },
+        }
+      : {
+          'routes/+page.svelte': {
+            '../../../demo-query': '../demo-query',
+            '../../../demo-studio.css': '../demo-studio.css',
+          },
+          'routes/away/+page.svelte': {
+            '../../../../demo-studio.css': '../../demo-studio.css',
+          },
+        }
+  for (const [file, imports] of Object.entries(presentationImports)) {
+    const path = join(cell.root, 'src', file)
+    let source = await readFile(path, 'utf8')
+    for (const [from, to] of Object.entries(imports))
+      source = source.replaceAll(from, to)
+    await writeFile(path, source)
+  }
   // Preserve the original starter's preceding check/build evidence; only the
   // owned full-feature qualification copy needs explicit script transpilation.
   if (spec.kind === 'plain') {

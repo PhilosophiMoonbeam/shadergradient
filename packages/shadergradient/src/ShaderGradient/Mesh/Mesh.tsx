@@ -3,7 +3,7 @@ import { MeshT } from '@/types'
 import { Materials } from './Materials'
 import { shaders } from '@shadergradient/core'
 
-import { dToRArr, colorToRgb } from '@/utils'
+import { dToRArr } from '@/utils'
 import { debug } from '@/utils/debug'
 
 export function Mesh({
@@ -38,7 +38,7 @@ export function Mesh({
   const { vertex, fragment } = shaders[shader][type]
 
   // Prepare uniforms based on shader type
-  const baseUniforms = {
+  const uniforms = {
     colors: [color1, color2, color3],
     uTime,
     uSpeed,
@@ -52,41 +52,13 @@ export function Mesh({
     uLoopDuration: loopDuration || 5.0,
   }
 
-  // Add glass-specific uniforms
-  const glassUniforms =
-    shader === 'glass'
-      ? {
-          uColor1: colorToRgb(color1),
-          uColor2: colorToRgb(color2),
-          uColor3: colorToRgb(color3),
-          uTransparency: 0.1,
-          uRefraction: 1.5,
-          uChromaticAberration: 0.1,
-          uFresnelPower: 2.0,
-          uReflectivity: 0.9,
-          uWaveAmplitude: 0.02,
-          uWaveFrequency: 5.0,
-          uDistortion: 0.1,
-          uFlowSpeed: 0.1,
-          uFlowDirection: { x: 1.0, y: 0.5 },
-          uLiquidEffect: 0.5,
-          uFoamIntensity: 0.3,
-          envMapIntensity: 1.0,
-        }
-      : {}
-
-  const uniforms = {
-    ...baseUniforms,
-    ...glassUniforms,
-  }
-
   return (
     <mesh
       name='shadergradient-mesh'
       position={[positionX, positionY, positionZ]}
       rotation={dToRArr([rotationX, rotationY, rotationZ])}
     >
-      <Geometry type={type} />
+      <Geometry type={type} shader={shader} />
       <Materials
         animate={animate}
         range={range}

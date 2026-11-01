@@ -13,8 +13,9 @@
   let { settings, lifecycle, onReady }: MeshProps = $props()
 
   const initialSettings = untrack(() => settings)
-  let geometry = createGeometry(initialSettings.type)
+  let geometry = createGeometry(initialSettings)
   let geometryType = initialSettings.type
+  let geometryGlass = initialSettings.shader === 'glass'
   let materialHandle = createMaterial(initialSettings)
   let materialType = initialSettings.type
   let shader = initialSettings.shader
@@ -51,10 +52,14 @@
   $effect(() => {
     if (disposed) return
 
-    if (geometryType !== settings.type) {
+    if (
+      geometryType !== settings.type ||
+      geometryGlass !== (settings.shader === 'glass')
+    ) {
       const previous = geometry
-      geometry = createGeometry(settings.type)
+      geometry = createGeometry(settings)
       geometryType = settings.type
+      geometryGlass = settings.shader === 'glass'
       mesh.geometry = geometry
       previous.dispose()
     }

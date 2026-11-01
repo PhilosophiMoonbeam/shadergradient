@@ -1,0 +1,603 @@
+/* Presentation only. Framework apps retain their own state and scene ownership. */
+.demo-studio {
+  --studio-bg: #101713;
+  --studio-surface: #1a231d;
+  --studio-raised: #233027;
+  --studio-line: #3c4d40;
+  --studio-fg: #f0f2e9;
+  --studio-muted: #b5c4b6;
+  --studio-accent: #d7efad;
+  color-scheme: dark;
+  box-sizing: border-box;
+  min-height: 100svh;
+  min-width: 0;
+  background: var(--studio-bg);
+  color: var(--studio-fg);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Other routes, including the approved Glass Studio, remain untouched. */
+body:has(.demo-studio) {
+  margin: 0;
+  background: #101713;
+}
+
+.demo-studio *,
+.demo-studio *::before,
+.demo-studio *::after {
+  box-sizing: border-box;
+}
+
+.demo-studio .studio-shell,
+.demo-studio.studio-shell {
+  width: min(100%, 1520px);
+  min-width: 0;
+  margin: 0 auto;
+  padding: 0 36px;
+}
+
+.demo-studio .studio-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  min-height: 88px;
+  border-bottom: 1px solid var(--studio-line);
+}
+
+.demo-studio .studio-brand {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--studio-fg);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.demo-studio .studio-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 4px 10px;
+  border: 1px solid #637458;
+  border-radius: 999px;
+  background: #263222;
+  color: var(--studio-accent);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.demo-studio .studio-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 420px);
+  align-items: end;
+  gap: 14px 32px;
+  padding: 40px 0 30px;
+}
+
+.demo-studio .studio-intro > .studio-eyebrow {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+}
+
+.demo-studio .studio-intro > h1 {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.demo-studio .studio-intro > .studio-lede {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.demo-studio .studio-intro > nav {
+  grid-column: 1 / -1;
+}
+
+.demo-studio .studio-eyebrow {
+  margin: 0 0 10px;
+  color: var(--studio-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.demo-studio h1 {
+  margin: 0;
+  color: var(--studio-fg);
+  font-size: clamp(34px, 4.2vw, 62px);
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.demo-studio h2 {
+  margin: 0 0 12px;
+  color: var(--studio-fg);
+  font-size: clamp(21px, 2.1vw, 29px);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 1.25;
+}
+
+.demo-studio h3 {
+  margin: 0 0 10px;
+  color: var(--studio-fg);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.demo-studio .studio-lede,
+.demo-studio .studio-copy {
+  color: var(--studio-muted);
+  line-height: 1.8;
+}
+
+.demo-studio .studio-lede {
+  max-width: 420px;
+  margin: 0 0 3px;
+  font-size: 14px;
+}
+
+.demo-studio .studio-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+  gap: 18px;
+  min-width: 0;
+}
+
+.demo-studio .studio-panel,
+.demo-studio .studio-controls,
+.demo-studio .studio-card {
+  min-width: 0;
+  border: 1px solid var(--studio-line);
+  border-radius: 12px;
+  background: var(--studio-surface);
+  color: var(--studio-fg);
+}
+
+.demo-studio .studio-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.demo-studio .studio-panel-header,
+.demo-studio .studio-panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  padding: 15px 20px;
+  color: var(--studio-muted);
+  font-size: 12px;
+}
+
+.demo-studio .studio-panel-header {
+  border-bottom: 1px solid var(--studio-line);
+}
+
+.demo-studio .studio-panel-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--studio-line);
+}
+
+.demo-studio .studio-panel-header p,
+.demo-studio .studio-panel-footer p {
+  margin: 0;
+}
+
+.demo-studio .studio-preview {
+  position: relative;
+  width: 100%;
+  height: clamp(440px, 55svh, 640px);
+  min-height: 440px;
+  min-width: 0;
+  overflow: hidden;
+  isolation: isolate;
+  background: #17241c;
+}
+
+.demo-studio .studio-preview canvas {
+  display: block;
+  max-width: 100%;
+}
+
+.demo-studio .studio-controls,
+.demo-studio .studio-card {
+  padding: 24px;
+}
+
+.demo-studio .studio-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 22px;
+}
+
+.demo-studio fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.demo-studio legend {
+  max-width: 100%;
+  margin-bottom: 10px;
+  padding: 0;
+  color: var(--studio-fg);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.demo-studio .studio-field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 9px;
+  min-width: 0;
+  width: 100%;
+  color: var(--studio-fg);
+  font-size: 13px;
+}
+
+.demo-studio .studio-field > span,
+.demo-studio .studio-field > label {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.demo-studio output {
+  color: var(--studio-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.demo-studio button,
+.demo-studio input,
+.demo-studio select,
+.demo-studio textarea {
+  max-width: 100%;
+  font: inherit;
+}
+
+.demo-studio select,
+.demo-studio
+  input:where(
+    :not([type='checkbox']):not([type='radio']):not([type='range']):not(
+        [type='color']
+      )
+  ),
+.demo-studio textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #62715f;
+  border-radius: 7px;
+  background: #121c16;
+  color: var(--studio-fg);
+}
+
+.demo-studio input[type='range'] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  accent-color: var(--studio-accent);
+  cursor: pointer;
+}
+
+.demo-studio input[type='checkbox'],
+.demo-studio input[type='radio'] {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 auto;
+  margin: 0;
+  accent-color: var(--studio-accent);
+}
+
+.demo-studio input[type='color'],
+.demo-studio .studio-swatch {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  padding: 3px;
+  border: 1px solid #819076;
+  border-radius: 8px;
+  background: #121c16;
+  cursor: pointer;
+}
+
+.demo-studio button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #60705a;
+  border-radius: 7px;
+  background: #26372a;
+  color: var(--studio-fg);
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.demo-studio button:hover {
+  background: #354b36;
+}
+
+.demo-studio button[aria-pressed='true'],
+.demo-studio button[aria-selected='true'] {
+  border-color: #8ea67b;
+  background: #3b5434;
+  color: #f3faeb;
+}
+
+.demo-studio .studio-button {
+  border-color: var(--studio-accent);
+  background: var(--studio-accent);
+  color: #24351d;
+  font-weight: 600;
+}
+
+.demo-studio .studio-button:hover {
+  background: #e6f6c8;
+}
+
+.demo-studio .studio-button-secondary {
+  background: transparent;
+  color: var(--studio-fg);
+}
+
+.demo-studio :is(button, input, select, textarea):disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.demo-studio :is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 3px solid var(--studio-accent);
+  outline-offset: 4px;
+}
+
+.demo-studio a {
+  color: var(--studio-accent);
+  text-underline-offset: 4px;
+}
+
+.demo-studio .studio-row,
+.demo-studio .studio-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-width: 0;
+}
+
+.demo-studio .studio-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: var(--studio-fg);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.demo-studio .studio-section {
+  min-width: 0;
+  margin-top: 36px;
+  padding-top: 30px;
+  border-top: 1px solid var(--studio-line);
+}
+
+.demo-studio .studio-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin-bottom: 20px;
+}
+
+.demo-studio .studio-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 18px;
+  min-width: 0;
+}
+
+.demo-studio .studio-copy,
+.demo-studio .studio-note,
+.demo-studio .studio-error,
+.demo-studio .studio-card {
+  overflow-wrap: anywhere;
+}
+
+.demo-studio .studio-note,
+.demo-studio .studio-error {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid #596a50;
+  border-radius: 8px;
+  background: #223020;
+  color: #d8e5cf;
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.demo-studio .studio-error {
+  border-color: #a66c64;
+  background: #351f22;
+  color: #ffd1c9;
+}
+
+.demo-studio .studio-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 18px;
+  margin: 0;
+}
+
+.demo-studio .studio-metrics dt {
+  color: var(--studio-muted);
+  font-size: 12px;
+}
+
+.demo-studio .studio-metrics dd {
+  margin: 4px 0 0;
+  color: var(--studio-fg);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.demo-studio details {
+  min-width: 0;
+  padding: 16px 0;
+}
+
+.demo-studio summary {
+  width: fit-content;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 10px 0;
+  color: var(--studio-accent);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.demo-studio pre {
+  max-width: 100%;
+  padding: 16px;
+  overflow: auto;
+  border: 1px solid var(--studio-line);
+  border-radius: 8px;
+  background: #111a14;
+  color: #dbe7d2;
+  font-size: 12px;
+}
+
+.demo-studio .studio-footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 34px;
+  padding: 24px 0 30px;
+  border-top: 1px solid var(--studio-line);
+  color: var(--studio-muted);
+  font-size: 12px;
+}
+
+/* Keep long editing desks from scrolling a visible preview out of its lifecycle. */
+@media (min-width: 901px) {
+  .demo-studio .studio-workspace > .studio-panel:first-child {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+}
+
+@media (max-width: 1000px) {
+  .demo-studio .studio-shell,
+  .demo-studio.studio-shell {
+    padding: 0 24px;
+  }
+
+  .demo-studio .studio-workspace {
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: 14px;
+  }
+
+  .demo-studio .studio-controls,
+  .demo-studio .studio-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 900px) {
+  .demo-studio .studio-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .demo-studio .studio-intro {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 20px;
+  }
+
+  .demo-studio .studio-intro > :is(.studio-eyebrow, h1, .studio-lede, nav) {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .demo-studio .studio-lede {
+    max-width: 600px;
+  }
+}
+
+@media (max-width: 480px) {
+  .demo-studio .studio-shell,
+  .demo-studio.studio-shell {
+    padding: 0 16px;
+  }
+
+  .demo-studio .studio-header {
+    min-height: 74px;
+    padding: 14px 0;
+    font-size: 13px;
+  }
+
+  .demo-studio .studio-intro {
+    padding: 29px 0 24px;
+  }
+
+  .demo-studio .studio-preview {
+    height: 400px;
+    min-height: 360px;
+  }
+
+  .demo-studio .studio-panel-header,
+  .demo-studio .studio-panel-footer {
+    padding: 13px 15px;
+  }
+
+  .demo-studio .studio-controls,
+  .demo-studio .studio-card {
+    padding: 20px 18px;
+  }
+
+  .demo-studio .studio-field,
+  .demo-studio .studio-controls > fieldset {
+    align-self: stretch;
+    width: 100%;
+  }
+
+  .demo-studio .studio-actions > button {
+    flex: 1 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-studio *,
+  .demo-studio *::before,
+  .demo-studio *::after {
+    animation: none;
+    transition: none;
+    scroll-behavior: auto;
+  }
+}

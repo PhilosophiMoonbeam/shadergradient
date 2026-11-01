@@ -78,6 +78,29 @@ Managed mode is the default. It owns its gradient mesh/material/time, camera/con
 
 `onCameraUpdate` is a Gradient callback, not a Canvas or Source `onReady` callback. `CameraUpdate` reports integer-degree azimuth/polar, plus two-decimal `cDistance` for non-spheres or `cameraZoom` for spheres. Camera input angles and mesh rotations are degrees. The callback can feed your own UI; avoid unnecessary feedback that rewrites the same props. `onError(GradientError)` reports typed error codes such as `unsupported-webgl`, `renderer`, `environment` and `context-lost`.
 
+## Physical glass
+
+`shader="glass"` uses Three's physical transmission and environment-reflection
+implementation, with procedural geometry and normalized linear tint colors. It
+is not low-opacity alpha blending or a chromatic outline. `reflection` controls
+polish through `roughness = 1 - reflection`; start near `0.92` for clear glass.
+Use modest deformation, such as `uStrength={0.18}`, to inspect the optical cues.
+
+Place **opaque Three objects behind the glass in the same scene** and provide an
+HDR environment, for example `lightType="env" envPreset="city"` in managed mode.
+CSS backgrounds, DOM elements and other transparent meshes do not supply the
+opaque-scene transmission buffer. Without scene detail or suitable lighting,
+clear glass can be hard to see. In external mode the host supplies the scene
+content and environment; the Gradient still does not take ownership of them.
+
+The sphere is a closed shape; plane and waterPlane are open glass sheets, not
+solid lenses or closed water volumes. All three retain live tint, roughness and
+time controls without rebuilding their material for each control change.
+Different Three revisions, renderer output settings and environments need not
+produce pixel-identical results. See the
+[Next Glass Studio](../../apps/example-nextjs-dev/README.md) for an interactive
+opaque-backdrop comparison using the corresponding public React SDK.
+
 ## Host-owned Threlte composition
 
 Use `mode="external"` inside an existing Threlte Canvas when its camera, renderer, lights, environment, effects and render hooks belong to the host. External mode creates only the gradient mesh/material and its time updates. It accepts mesh/time settings and query input, but camera, lighting, grain/axes and `onCameraUpdate` are rejected by its public type. It does not dispose host-owned objects on removal.

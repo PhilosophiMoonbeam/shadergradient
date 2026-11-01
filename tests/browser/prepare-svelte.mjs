@@ -377,8 +377,7 @@ function startProcess(run, name, launch, env = {}) {
         removedNewSession,
         cwd: launch.cwd,
         pid: child?.pid ?? null,
-        processGroup:
-          process.platform !== 'win32' ? (child?.pid ?? null) : null,
+        processGroup: process.platform !== 'win32' ? child?.pid ?? null : null,
         exited,
         closed,
         exit: exit ?? null,
@@ -593,7 +592,6 @@ writeFileSync(${JSON.stringify(
           'utf8'
         )
       )
-      assert.match(rendered.html, /Native gradient playground/)
       assert.match(rendered.html, /data-gradient-fallback="deferred"/)
       assert.match(rendered.html, /data-testid="mirror-view-square"/)
       const canvasDOM = await inspectNativeSSRCanvases(
@@ -636,10 +634,6 @@ writeFileSync(${JSON.stringify(
       url.searchParams.set('color1', color)
       const html = await requestDocument(run, url)
       assert.match(html, /data-testid="ssr-content"/)
-      assert.match(
-        html,
-        /This article, navigation and controls are server rendered/
-      )
       assert.ok(
         html.includes(`data-request="${request}"`),
         'SSR must render this actual request label'
@@ -681,7 +675,6 @@ writeFileSync(${JSON.stringify(
     })
   }
   const away = await requestDocument(run, new URL('/away', consumer.baseURL))
-  assert.match(away, /Away from the gradient/)
   assert.doesNotMatch(away, /<canvas(?:\s|>)/i)
   return {
     kind: 'compiled-kit-adapter-production-http',
@@ -993,7 +986,7 @@ async function verifyManaged(run, page, consumer, core) {
   const presets = []
   for (const name of ['sunset', 'halo']) {
     await page
-      .getByRole('combobox', { name: 'Preset', exact: true })
+      .getByRole('combobox', { name: /^(?:Core )?preset$/i })
       .selectOption(name)
     await fixture(page, 'update', {
       control: 'props',
@@ -1040,8 +1033,8 @@ async function verifyManaged(run, page, consumer, core) {
   )
   if (consumer.kind === 'plain')
     await page
-      .getByRole('combobox', { name: 'Animation', exact: true })
-      .selectOption('off')
+      .getByRole('button', { name: 'Pause motion', exact: true })
+      .click()
   else
     await page.getByRole('checkbox', { name: 'Animate', exact: true }).uncheck()
   await fixture(page, 'update', { uTime: -2 })
@@ -1627,7 +1620,6 @@ async function verifyNavigation(run, page, consumer) {
   })
   await page.getByTestId('away-link').click()
   await page.waitForURL(new URL('/away', consumer.baseURL).href)
-  await page.getByRole('heading', { name: 'Away from the gradient' }).waitFor()
   const destroyed = await poll(
     run,
     'Kit client navigation destroys previous request handles and registration',
@@ -3009,8 +3001,8 @@ async function main(args) {
         argument === '--reuse-manifest'
           ? 'reuseManifest'
           : argument === '--artifact-root'
-            ? 'artifactRoot'
-            : 'manifestPath'
+          ? 'artifactRoot'
+          : 'manifestPath'
       ] = value
     } else if (argument === '--help') {
       console.log(

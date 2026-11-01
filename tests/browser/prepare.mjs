@@ -7,6 +7,7 @@ import { createHash, randomUUID } from 'node:crypto'
 import { createReadStream, createWriteStream } from 'node:fs'
 import {
   copyFile,
+  cp,
   link,
   lstat,
   mkdir,
@@ -684,7 +685,11 @@ async function reconcileSupport() {
   })
 }
 
-async function prepareLegacy(core) {
+async function prepareLegacy(core, namespace) {
+  // Core has already been freshly prepared by the sole root preparation owner.
+  // Build through the public React/Core exports before building their consumer.
+  await run('react-build', ['--filter', '@shadergradient/react', 'build'])
+  await run('react-studio-build', ['--filter', 'example-react-dev', 'build'])
   await run('vue-build', ['--filter', '@shadergradient/vue', 'build'])
   const vueManifest = await json(
     join(root, 'packages/shadergradient-vue/package.json')
@@ -707,12 +712,64 @@ async function prepareLegacy(core) {
     vue: { tarball: vueTarball, sha256: digest(await readFile(vueTarball)) },
     consumers: [],
   }
+  const vueHash = report.legacyPackages.vue.sha256
   for (const name of ['example-vite-vue', 'example-nuxtjs']) {
-    const directory = join(root, 'apps/examples', name)
-    // Both existing independent starter overrides resolve exactly this newly
-    // packed core, not a registry version which may not have been published.
-    await copyFile(core.tarball, join(directory, 'shadergradient-core.tgz'))
-    await copyFile(vueTarball, join(directory, basename(vueTarball)))
+    const source = join(root, 'apps/examples', name)
+    const directory = join(namespace, 'legacy-consumers', name)
+    await cp(source, directory, {
+      recursive: true,
+      dereference: false,
+      filter: async (path) => {
+        const parts = relative(source, path).split('/')
+        if (
+          parts.some((part) =>
+            [
+              'node_modules',
+              '.nuxt',
+              '.output',
+              'dist',
+              '.git',
+              '.vite',
+            ].includes(part)
+          ) ||
+          path.endsWith('.tgz')
+        )
+          return false
+        assert.ok(
+          !(await lstat(path)).isSymbolicLink(),
+          `Unexpected starter symlink: ${path}`
+        )
+        return true
+      },
+    })
+    // Content-addressed file dependencies cannot silently reuse a stale same-
+    // version local tarball or resolve Core from the registry. Other versions
+    // remain selected by the copied starter lockfile.
+    const coreName = `shadergradient-core-${core.sha256}.tgz`
+    const vueName = `shadergradient-vue-${vueHash}.tgz`
+    await copyFile(core.tarball, join(directory, coreName))
+    await copyFile(vueTarball, join(directory, vueName))
+    const manifest = await json(join(directory, 'package.json'))
+    manifest.dependencies['@shadergradient/vue'] = `file:${vueName}`
+    manifest.pnpm = {
+      ...manifest.pnpm,
+      overrides: {
+        ...manifest.pnpm?.overrides,
+        '@shadergradient/core': `file:${coreName}`,
+      },
+    }
+    await putJSON(join(directory, 'package.json'), manifest)
+    // Keep the copied workspace setting explicit too; its precedence must not
+    // depend on pnpm's root-manifest compatibility behavior.
+    const workspacePath = join(directory, 'pnpm-workspace.yaml')
+    const workspace = await readFile(workspacePath, 'utf8')
+    await writeFile(
+      workspacePath,
+      workspace.replaceAll(
+        'file:./shadergradient-core.tgz',
+        `file:./${coreName}`
+      )
+    )
     await run(`${name}-install`, [
       '--dir',
       directory,
@@ -731,17 +788,19 @@ async function prepareLegacy(core) {
       installed[kind] = { root: packageDirectory, files: {} }
       for (const file of ['index.js', 'index.d.ts']) {
         const actual = await readFile(join(packageDirectory, 'dist', file))
-        assert.deepEqual(
-          actual,
-          await readFile(
-            join(root, `packages/shadergradient-${kind}/dist`, file)
-          ),
+        const expected = await readFile(
+          join(root, `packages/shadergradient-${kind}/dist`, file)
+        )
+        // Large Buffer structural diffs can consume quadratic memory on a real
+        // mismatch. Keep exact byte equality, but bound its failure diagnostic.
+        assert.ok(
+          actual.equals(expected),
           `${name}: installed ${kind}/${file} differs from the fresh build`
         )
         installed[kind].files[file] = digest(actual)
       }
     }
-    report.legacyPackages.consumers.push({ name, installed })
+    report.legacyPackages.consumers.push({ name, root: directory, installed })
     console.log(
       `${name}: installed core and Vue JavaScript/declarations match the fresh builds`
     )
@@ -791,7 +850,9 @@ async function startServers(project) {
         3107,
         [
           '--dir',
-          'apps/examples/example-vite-vue',
+          report.legacyPackages.consumers.find(
+            (item) => item.name === 'example-vite-vue'
+          ).root,
           'dev',
           '--host',
           '127.0.0.1',
@@ -805,12 +866,28 @@ async function startServers(project) {
         3108,
         [
           '--dir',
-          'apps/examples/example-nuxtjs',
+          report.legacyPackages.consumers.find(
+            (item) => item.name === 'example-nuxtjs'
+          ).root,
           'dev',
           '--host',
           '127.0.0.1',
           '--port',
           '3108',
+        ],
+      ],
+      [
+        'react-studio',
+        3109,
+        [
+          '--filter',
+          'example-react-dev',
+          'dev',
+          '--host',
+          '127.0.0.1',
+          '--port',
+          '3109',
+          '--strictPort',
         ],
       ],
     ].filter(([name]) => name === selected))
@@ -2170,7 +2247,7 @@ try {
     ],
     cwd: root,
   })
-  await prepareLegacy(prepared.packages.core)
+  await prepareLegacy(prepared.packages.core, prepared.artifactRoot)
   await run(
     'workspace-kit-build',
     ['--filter', 'example-sveltekit-dev', 'build'],

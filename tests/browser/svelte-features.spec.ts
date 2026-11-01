@@ -137,7 +137,7 @@ for (const name of presetNames) {
   }) => {
     const preset = presets[name]
     await page
-      .getByRole('combobox', { name: 'Preset', exact: true })
+      .getByRole('combobox', { name: /^(?:Core )?preset$/i })
       .selectOption(name)
     await native.update(
       { animate: 'off', enableTransition: false },

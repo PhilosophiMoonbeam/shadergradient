@@ -1,4 +1,6 @@
 <script lang="ts">
+  import '../../../demo-studio.css'
+  import { demoSearchParams, patchDemoSearchParams } from '../../../demo-query'
   import { onDestroy, onMount, tick, untrack } from 'svelte'
   import { Canvas } from '@threlte/core'
   import {
@@ -16,6 +18,7 @@
   import type { PageData } from './$types'
   import SceneProbe from '../lib/SceneProbe.svelte'
   import HostScene from '../lib/HostScene.svelte'
+  import GlassStudyScene from '../lib/GlassStudyScene.svelte'
   import { createFixtureObserver } from '../lib/fixture'
   import type {
     FixtureCanvasConfig,
@@ -752,6 +755,52 @@
   let settings = $state.raw<GradientSettingsInput>(
     untrack(() => ({ ...data.initialSettings }))
   )
+  // Display only the controls this page exposes; the SDK remains the settings authority.
+  let controlSettings = $derived.by(() => {
+    const values = { ...presets.halo.props, ...settings }
+    if (settings.control !== 'query') return values
+    const query = demoSearchParams(settings.urlString)
+    for (const key of [
+      'shader',
+      'type',
+      'animate',
+      'grain',
+      'lightType',
+      'envPreset',
+    ] as const) {
+      const value = query.get(key)
+      const choices = {
+        shader: ['defaults', 'positionMix', 'cosmic', 'glass'],
+        type: ['plane', 'sphere', 'waterPlane'],
+        animate: ['on', 'off'],
+        grain: ['on', 'off'],
+        lightType: ['3d', 'env'],
+        envPreset: ['city', 'dawn', 'lobby'],
+      }
+      if (value && choices[key].includes(value))
+        Object.assign(values, { [key]: value })
+    }
+    for (const key of ['color1', 'color2', 'color3'] as const) {
+      const value = query.get(key)
+      if (value && /^#[\da-f]{6}$/i.test(value)) values[key] = value
+    }
+    for (const key of ['uStrength', 'uSpeed', 'uTime', 'brightness'] as const) {
+      const value = query.get(key)
+      if (value?.trim() && Number.isFinite(Number(value)))
+        values[key] = Number(value)
+    }
+    return values
+  })
+  let presetSelection = $derived(
+    settings.control === 'query'
+      ? ''
+      : (Object.entries(presets).find(([, preset]) =>
+          Object.entries(preset.props).every(
+            ([key, value]) =>
+              settings[key as keyof GradientSettingsInput] === value
+          )
+        )?.[0] ?? '')
+  )
   let canvasConfig = $state.raw<FixtureCanvasConfig>({ pointerEvents: 'auto' })
   let mounted = $state(true)
   let clientMounted = $state(false)
@@ -872,12 +921,60 @@
       uiError = error instanceof Error ? error.message : String(error)
     }
   }
+  function setControl(
+    patch: Omit<GradientSettingsInput, 'control' | 'urlString'>
+  ) {
+    return fixture.update(
+      settings.control === 'query'
+        ? {
+            ...patch,
+            control: 'query',
+            urlString: patchDemoSearchParams(settings.urlString, patch),
+          }
+        : { ...patch, control: 'props' }
+    )
+  }
   function selectPreset(name: PresetName) {
     void apply(
       fixture.update({
         ...presets[name].props,
         control: 'props',
         urlString: '',
+      })
+    )
+  }
+  function loadGlassStudy() {
+    void apply(
+      fixture.update({
+        ...presets.halo.props,
+        control: 'props',
+        urlString: '',
+        shader: 'glass',
+        type: 'sphere',
+        lightType: 'env',
+        envPreset: 'city',
+        animate: 'off',
+        grain: 'off',
+        uTime: 2,
+        uStrength: 0.18,
+        uDensity: 1.1,
+        uFrequency: 2,
+        uAmplitude: 0.2,
+        reflection: 0.94,
+        brightness: 1.2,
+        color1: '#f5fbff',
+        color2: '#e3f0ff',
+        color3: '#fff2e6',
+        positionX: 0,
+        positionY: 0,
+        positionZ: 0,
+        rotationX: 0,
+        rotationY: 0,
+        rotationZ: 0,
+        cAzimuthAngle: 0,
+        cPolarAngle: 90,
+        cDistance: 4.8,
+        cameraZoom: 1,
       })
     )
   }
@@ -901,772 +998,984 @@
 </script>
 
 <svelte:head>
-  <title>Native ShaderGradient · SvelteKit SSR</title>
+  <title>Page &amp; Light · SvelteKit ShaderGradient</title>
   <meta
     name="description"
     content="A request-isolated, server-rendered SvelteKit consumer of native ShaderGradient with accessible live controls and real navigation teardown."
   />
 </svelte:head>
 
-<main>
+<main class="demo-studio kit-studio">
   {#if selectedBindingMode}
     <BindingRegression mode={selectedBindingMode} />
   {:else}
-    <header>
-      <p class="eyebrow">Native Svelte + Threlte · SvelteKit 3.1</p>
-      <h1>ShaderGradient, with the page intact</h1>
-      <p data-testid="ssr-content">
-        This article, navigation and controls are server rendered. Only the
-        dimensioned gradient scenes wait for browser mount and WebGL.
-      </p>
-      <p
-        data-testid="request-settings"
-        data-request={data.requestLabel}
-        data-color1={data.initialSettings.color1}
-      >
-        Request: <strong>{data.requestLabel}</strong> · Initial color:
-        <code>{data.initialSettings.color1}</code>
-      </p>
-      <nav aria-label="Examples">
-        <a href="/away" data-testid="away-link">Visit the away route</a>
-        <a href="/?request=coral&color1=%23ff7044">Coral request</a>
-        <a href="/?request=ocean&color1=%232280cc">Ocean request</a>
-      </nav>
-    </header>
+    <div class="studio-shell">
+      <header class="studio-header">
+        <a class="studio-brand" href="/"
+          >ShaderGradient <span> / Page &amp; Light</span></a
+        >
+        <span class="studio-badge">SvelteKit 3 · Native Svelte 5</span>
+      </header>
 
-    <section aria-labelledby="managed-heading">
-      <h2 id="managed-heading">Live managed scene</h2>
-      <div class="controls">
-        <label
-          >Preset <select
-            aria-label="Preset"
-            onchange={(event) =>
-              selectPreset(event.currentTarget.value as PresetName)}
+      <article class="studio-intro page-story" aria-labelledby="page-title">
+        <p class="studio-eyebrow">
+          Field notes / 03 · Server first, light later
+        </p>
+        <h1 id="page-title">A page before<br />a single pixel.</h1>
+        <p class="studio-lede" data-testid="ssr-content">
+          Server-rendered words, controls and request-local settings. Native
+          Svelte and Threlte hydrate the light without replacing the page.
+        </p>
+        <div class="request-strip">
+          <p
+            data-testid="request-settings"
+            data-request={data.requestLabel}
+            data-color1={data.initialSettings.color1}
           >
-            {#each Object.keys(presets) as name (name)}<option value={name}
-                >{name}</option
-              >{/each}
-          </select></label
-        >
-        <label
-          >Shader <select
-            aria-label="Shader"
-            value={settings.shader ?? 'defaults'}
-            onchange={(event) =>
-              apply(
-                fixture.update({
-                  control: 'props',
-                  shader: event.currentTarget.value as
-                    'defaults' | 'positionMix' | 'cosmic' | 'glass',
-                })
-              )}
-          >
-            <option>defaults</option><option>positionMix</option><option
-              >cosmic</option
-            ><option>glass</option>
-          </select></label
-        >
-        <label
-          >Geometry <select
-            aria-label="Geometry"
-            value={settings.type ?? 'plane'}
-            onchange={(event) =>
-              apply(
-                fixture.update({
-                  control: 'props',
-                  type: event.currentTarget.value as
-                    'plane' | 'sphere' | 'waterPlane',
-                })
-              )}
-          >
-            <option>plane</option><option>sphere</option><option
-              >waterPlane</option
-            >
-          </select></label
-        >
-        <label
-          >First color <input
-            aria-label="First color"
-            type="color"
-            value={settings.color1 ?? '#ff5005'}
-            oninput={(event) =>
-              apply(
-                fixture.update({
-                  control: 'props',
-                  color1: event.currentTarget.value,
-                })
-              )}
-          /></label
-        >
-        <label
-          >Noise strength <input
-            aria-label="Noise strength"
-            type="range"
-            min="0"
-            max="10"
-            step="0.1"
-            value={settings.uStrength ?? 4}
-            oninput={(event) =>
-              apply(
-                fixture.update({
-                  control: 'props',
-                  uStrength: Number(event.currentTarget.value),
-                })
-              )}
-          /></label
-        >
-        <label
-          >Animate <input
-            type="checkbox"
-            checked={settings.animate !== 'off'}
-            onchange={(event) =>
-              apply(
-                fixture.update({
-                  control: 'props',
-                  animate: event.currentTarget.checked ? 'on' : 'off',
-                })
-              )}
-          /></label
-        >
-        <label
-          >Grain <input
-            type="checkbox"
-            checked={settings.grain !== 'off'}
-            onchange={(event) =>
-              apply(
-                fixture.update({
-                  control: 'props',
-                  grain: event.currentTarget.checked ? 'on' : 'off',
-                })
-              )}
-          /></label
-        >
-        <button onclick={() => apply(fixture.lifecycle.setMounted(!mounted))}
-          >{mounted ? 'Unmount' : 'Mount'} managed scene</button
-        >
-        <button
-          onclick={() => apply(fixture.lifecycle.setVisible(!placedVisible))}
-          >{placedVisible ? 'Move scene offscreen' : 'Bring scene back'}</button
-        >
-        <button onclick={() => apply(fixture.lifecycle.requestFrame())}
-          >Request a completed frame</button
-        >
-      </div>
-      <p>
-        Drag the scene to orbit; scroll or pinch to zoom. Reduced motion follows
-        your browser preference.
-      </p>
-      <div
-        bind:this={wrapper}
-        class="managed-placement"
-        class:offscreen={!placedVisible}
-        data-testid="managed-placement"
+            This request <strong>{data.requestLabel}</strong>
+            <span>Initial ink <code>{data.initialSettings.color1}</code></span>
+          </p>
+          <nav class="studio-row" aria-label="Examples">
+            <a href="/?request=coral&color1=%23ff7044">Coral request ↗</a>
+            <a href="/?request=ocean&color1=%232280cc">Ocean request ↗</a>
+            <a href="/away" data-testid="away-link">Away &amp; back ↗</a>
+          </nav>
+        </div>
+      </article>
+
+      <section
+        class="studio-section managed-study"
+        aria-labelledby="managed-heading"
       >
-        {#if mounted}
-          <ShaderGradientCanvas
-            {...canvasConfig}
-            class="managed-gradient"
-            style="width:100%;height:360px"
-            aria-hidden={false}
-            role="img"
-            aria-label="Interactive shader gradient"
-            onError={reportNativeError}
-          >
-            <SceneProbe {observer} />
-            <ShaderGradient
-              {...settings}
-              onCameraUpdate={observer.cameraUpdate}
-              onError={reportNativeError}
-            />
-            {#snippet fallback(state)}
-              <div
-                class="fallback"
-                data-native-fallback={state.status}
-                data-testid="native-fallback"
+        <div class="studio-section-heading managed-heading">
+          <div>
+            <p class="studio-eyebrow">01 / Hydrated light</p>
+            <h2 id="managed-heading">Shape the atmosphere.</h2>
+          </div>
+          <p class="studio-copy managed-description">
+            A managed scene enhances the page, rather than replacing it. All ten
+            Core presets and twelve shader / geometry combinations are yours to
+            explore.
+          </p>
+        </div>
+        <div class="studio-workspace managed-workspace">
+          <div class="studio-panel">
+            <div class="studio-panel-header">
+              <span>Live managed scene</span>
+              <span class="studio-badge"
+                >{controlSettings.shader} / {controlSettings.type}</span
               >
-                <strong>Gradient preview</strong><span
-                  >{state.status === 'deferred'
-                    ? 'The interactive gradient starts in your browser when visible.'
-                    : state.status === 'loading'
-                      ? 'Preparing the first rendered frame…'
-                      : state.error.message}</span
+            </div>
+            <div
+              bind:this={wrapper}
+              class="studio-preview managed-placement"
+              class:offscreen={!placedVisible}
+              data-testid="managed-placement"
+            >
+              {#if mounted}
+                <ShaderGradientCanvas
+                  {...canvasConfig}
+                  class="managed-gradient"
+                  style="width:100%;height:100%"
+                  aria-hidden={false}
+                  role="img"
+                  aria-label="Interactive shader gradient"
+                  onError={reportNativeError}
+                >
+                  <SceneProbe {observer} />
+                  {#if controlSettings.shader === 'glass'}
+                    <GlassStudyScene />
+                  {/if}
+                  <ShaderGradient
+                    {...settings}
+                    onCameraUpdate={observer.cameraUpdate}
+                    onError={reportNativeError}
+                  />
+                  {#snippet fallback(state)}
+                    <div
+                      class="fallback"
+                      data-native-fallback={state.status}
+                      data-testid="native-fallback"
+                      role={state.status === 'error' ||
+                      state.status === 'unsupported'
+                        ? 'alert'
+                        : 'status'}
+                    >
+                      <span class="fallback-mark" aria-hidden="true">◌</span>
+                      <strong>The page is already here.</strong>
+                      <span
+                        >{state.status === 'deferred'
+                          ? 'The interactive gradient starts in your browser when visible.'
+                          : state.status === 'loading'
+                            ? 'Preparing the first rendered frame…'
+                            : state.error.message}</span
+                      >
+                    </div>
+                  {/snippet}
+                </ShaderGradientCanvas>
+              {:else}
+                <div class="empty-scene">
+                  <strong>Light, switched off.</strong>
+                  <span
+                    >The managed scene has been unmounted. The article remains.</span
+                  >
+                </div>
+              {/if}
+            </div>
+            <div class="studio-panel-footer">
+              <span>Drag to orbit · scroll or pinch to zoom</span>
+              <span>Motion respects your browser preference</span>
+            </div>
+          </div>
+          <aside class="studio-controls" aria-label="Managed gradient controls">
+            <fieldset>
+              <legend>Choose a starting point</legend>
+              <label class="studio-field"
+                >Preset
+                <select
+                  aria-label="Preset"
+                  value={presetSelection}
+                  onchange={(event) =>
+                    selectPreset(event.currentTarget.value as PresetName)}
+                >
+                  <option value="" disabled
+                    >Request settings / custom study</option
+                  >
+                  {#each Object.keys(presets) as name (name)}
+                    <option value={name}>{name}</option>
+                  {/each}
+                </select>
+              </label>
+              <div class="control-pair">
+                <label class="studio-field"
+                  >Shader
+                  <select
+                    aria-label="Shader"
+                    value={controlSettings.shader}
+                    onchange={(event) =>
+                      apply(
+                        setControl({
+                          shader: event.currentTarget.value as
+                            'defaults' | 'positionMix' | 'cosmic' | 'glass',
+                        })
+                      )}
+                  >
+                    <option>defaults</option><option>positionMix</option><option
+                      >cosmic</option
+                    ><option>glass</option>
+                  </select>
+                </label>
+                <label class="studio-field"
+                  >Geometry
+                  <select
+                    aria-label="Geometry"
+                    value={controlSettings.type}
+                    onchange={(event) =>
+                      apply(
+                        setControl({
+                          type: event.currentTarget.value as
+                            'plane' | 'sphere' | 'waterPlane',
+                        })
+                      )}
+                  >
+                    <option>plane</option><option>sphere</option><option
+                      >waterPlane</option
+                    >
+                  </select>
+                </label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>Color &amp; surface</legend>
+              <div class="palette-row">
+                {#each ['color1', 'color2', 'color3'] as key, index (key)}
+                  <label class="studio-field"
+                    >{['First color', 'Second color', 'Third color'][index]}
+                    <input
+                      class="studio-swatch"
+                      aria-label={[
+                        'First color',
+                        'Second color',
+                        'Third color',
+                      ][index]}
+                      type="color"
+                      value={controlSettings[key as 'color1']}
+                      oninput={(event) =>
+                        apply(
+                          setControl({
+                            [key]: event.currentTarget.value,
+                          })
+                        )}
+                    />
+                  </label>
+                {/each}
+              </div>
+              <label class="studio-field"
+                >Noise strength <output
+                  >{controlSettings.uStrength.toFixed(1)}</output
+                >
+                <input
+                  aria-label="Noise strength"
+                  type="range"
+                  min="0"
+                  max="10"
+                  step="0.1"
+                  value={controlSettings.uStrength}
+                  oninput={(event) =>
+                    apply(
+                      setControl({
+                        uStrength: Number(event.currentTarget.value),
+                      })
+                    )}
+                />
+              </label>
+              <div class="studio-row">
+                <label class="studio-toggle"
+                  ><input
+                    type="checkbox"
+                    checked={controlSettings.animate !== 'off'}
+                    onchange={(event) =>
+                      apply(
+                        setControl({
+                          animate: event.currentTarget.checked ? 'on' : 'off',
+                        })
+                      )}
+                  /> Animate</label
+                >
+                <label class="studio-toggle"
+                  ><input
+                    type="checkbox"
+                    checked={controlSettings.grain !== 'off'}
+                    onchange={(event) =>
+                      apply(
+                        setControl({
+                          grain: event.currentTarget.checked ? 'on' : 'off',
+                        })
+                      )}
+                  /> Grain</label
                 >
               </div>
-            {/snippet}
-          </ShaderGradientCanvas>
-        {:else}<div class="empty-scene">
-            The managed scene has been unmounted.
-          </div>{/if}
-      </div>
-      {#if uiError}<p role="alert">{uiError}</p>{/if}
-    </section>
-
-    <section aria-labelledby="independent-heading">
-      <h2 id="independent-heading">An independent instance</h2>
-      <p>
-        Changing or removing this scene does not change the managed scene above.
-      </p>
-      <label
-        >Independent color <input
-          aria-label="Independent color"
-          type="color"
-          bind:value={secondColor}
-        /></label
-      >
-      <button
-        data-testid="independent-canvases-toggle"
-        aria-pressed={secondMounted}
-        onclick={() => (secondMounted = !secondMounted)}
-        >{secondMounted ? 'Remove' : 'Restore'} independent instance</button
-      >
-      {#if secondMounted}
-        <div data-testid="independent-a">
-          <ShaderGradientCanvas
-            style="width:100%;height:220px"
-            class="independent-gradient"
-            aria-hidden={false}
-            role="img"
-            aria-label="Independent teal gradient"
-          >
-            <ShaderGradient
-              color1={secondColor}
-              color2="#3647d6"
-              color3="#eee2fa"
-              animate="off"
-              grain="off"
-            />
-            {#snippet fallback(state)}<div
-                class="fallback"
-                data-independent-fallback={state.status}
-              >
-                Independent gradient · {state.status}
-              </div>{/snippet}
-          </ShaderGradientCanvas>
+            </fieldset>
+            <fieldset>
+              <legend>Light the scene</legend>
+              <label class="studio-field"
+                >Lighting
+                <select
+                  aria-label="Lighting"
+                  value={controlSettings.lightType}
+                  onchange={(event) =>
+                    apply(
+                      setControl({
+                        lightType: event.currentTarget.value as '3d' | 'env',
+                      })
+                    )}
+                >
+                  <option value="3d">Ambient / 3D</option><option value="env"
+                    >HDR environment</option
+                  >
+                </select>
+              </label>
+              <label class="studio-field"
+                >HDR environment
+                <select
+                  aria-label="HDR environment"
+                  value={controlSettings.envPreset}
+                  onchange={(event) =>
+                    apply(
+                      setControl({
+                        envPreset: event.currentTarget.value as
+                          'city' | 'dawn' | 'lobby',
+                      })
+                    )}
+                >
+                  <option>city</option><option>dawn</option><option
+                    >lobby</option
+                  >
+                </select>
+              </label>
+            </fieldset>
+            <button class="studio-button-secondary" onclick={loadGlassStudy}
+              >Load glass study</button
+            >
+            {#if controlSettings.shader === 'glass'}
+              <p class="studio-note">
+                Real opaque stripes, color blocks and a gold sphere sit behind
+                the glass. Load the custom glass study for a front-facing
+                sphere, a smooth surface and HDR reflections; look for the
+                stripes bending through it. This is not a Core preset. Plane and
+                waterPlane are sheets, not closed lenses. The context is behind
+                the front-facing study, not every orbit angle.
+              </p>
+            {/if}
+            <p class="studio-note">
+              A preset applies its complete camera, geometry, lighting and
+              motion settings in props mode. Individual edits preserve unrelated
+              request query settings. Reduced-motion preferences still apply.
+            </p>
+          </aside>
         </div>
-      {/if}
-    </section>
+        <div class="studio-actions lifecycle-actions">
+          <button
+            class="studio-button-secondary"
+            onclick={() => apply(fixture.lifecycle.setMounted(!mounted))}
+            >{mounted ? 'Unmount' : 'Mount'} managed scene</button
+          >
+          <button
+            class="studio-button-secondary"
+            onclick={() => apply(fixture.lifecycle.setVisible(!placedVisible))}
+            >{placedVisible
+              ? 'Move scene offscreen'
+              : 'Bring scene back'}</button
+          >
+          <button
+            class="studio-button-secondary"
+            onclick={() => apply(fixture.lifecycle.requestFrame())}
+            >Request a completed frame</button
+          >
+        </div>
+        {#if uiError}<p class="studio-error" role="alert">{uiError}</p>{/if}
+      </section>
 
-    <section aria-labelledby="host-heading">
-      <h2 id="host-heading">Compose inside a host-owned Canvas</h2>
-      <p>
-        The host supplies its own camera, environment and white cube. Clearing
-        external gradients leaves these host objects and their renderer intact.
-      </p>
-      <div class="controls">
-        <button
-          onclick={() =>
-            apply(
-              fixture.externalHost.configure({
-                enabled: true,
-                gradients: [
-                  {
-                    shader: 'defaults',
-                    type: 'plane',
-                    animate: 'off',
-                    positionX: -2,
-                    rotationZ: 0,
-                    color1: '#fd7454',
-                  },
-                  {
-                    shader: 'cosmic',
-                    type: 'sphere',
-                    animate: 'off',
-                    positionX: 2,
-                    rotationZ: 0,
-                    color1: '#65c4ff',
-                  },
-                ],
-              })
-            )}>Mount two external gradients</button
-        >
-        <button onclick={() => apply(fixture.externalHost.clear())}
-          >Clear external gradients, retain host</button
-        >
-        <button
-          onclick={() =>
-            apply(
-              fixture.externalHost.configure({ enabled: false, gradients: [] })
-            )}>Destroy host Canvas</button
-        >
-      </div>
-      {#if clientMounted && external.enabled}
-        <svelte:boundary
-          onerror={(error) =>
-            observer.error(
-              {
-                code: 'renderer',
-                message: error instanceof Error ? error.message : String(error),
-                cause: error,
-              },
-              'host'
-            )}
-        >
-          <div class="host-canvas" data-testid="external-host">
-            <Canvas renderMode="on-demand"
-              ><HostScene {observer} gradients={external.gradients} /></Canvas
+      <section class="studio-section" aria-labelledby="page-contract-heading">
+        <div class="studio-section-heading">
+          <div>
+            <p class="studio-eyebrow">The page / enhancement contract</p>
+            <h2 id="page-contract-heading">Three layers. No blank page.</h2>
+          </div>
+        </div>
+        <div class="studio-cards">
+          <article class="studio-card">
+            <span class="chapter-number">01</span>
+            <h3>Read it on the server.</h3>
+            <p>
+              The article, request label, links and controls are HTML before
+              hydration. Coral and Ocean make fresh request-local settings;
+              there is no shared server color state.
+            </p>
+          </article>
+          <article class="studio-card">
+            <span class="chapter-number">02</span>
+            <h3>Enhance in the browser.</h3>
+            <p>
+              Dimensioned fallbacks reserve the scene's space. Browser mount is
+              not WebGL success: loading, unsupported contexts and rendering
+              errors keep their own honest messages.
+            </p>
+          </article>
+          <article class="studio-card">
+            <span class="chapter-number">03</span>
+            <h3>Leave without a trace.</h3>
+            <p>
+              The away route has no renderer. Navigation destroys this page's
+              owned scenes and handles; returning creates a new page tree. Try
+              the journey, not just a client-only toggle.
+            </p>
+            <a href="/away">Take the navigation study ↗</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="studio-section" aria-labelledby="independent-heading">
+        <div class="studio-section-heading">
+          <div>
+            <p class="studio-eyebrow">02 / Request-local, instance-local</p>
+            <h2 id="independent-heading">A light of its own.</h2>
+          </div>
+          <p class="studio-copy">
+            This is another managed Canvas, not a copy of the first one. Change
+            its ink or remove it: the main scene keeps its settings, camera and
+            lifecycle.
+          </p>
+        </div>
+        <div class="independent-study studio-panel">
+          <div class="independent-tools">
+            <label class="studio-field"
+              >Independent color <input
+                aria-label="Independent color"
+                type="color"
+                bind:value={secondColor}
+              /></label
+            >
+            <button
+              class="studio-button-secondary"
+              data-testid="independent-canvases-toggle"
+              aria-pressed={secondMounted}
+              onclick={() => (secondMounted = !secondMounted)}
+              >{secondMounted ? 'Remove' : 'Restore'} independent instance</button
             >
           </div>
-          {#snippet failed(error)}<p role="alert">
-              The host Canvas could not start: {error instanceof Error
-                ? error.message
-                : String(error)}
-            </p>{/snippet}
-        </svelte:boundary>
-      {/if}
-    </section>
-
-    <section aria-labelledby="fallback-heading">
-      <h2 id="fallback-heading">Errors remain visible</h2>
-      <p>
-        Fallbacks preserve useful content when WebGL is unavailable. This button
-        deliberately points the native environment loader at a nonexistent local
-        asset directory, so its real typed error can be observed without
-        replacing the page.
-      </p>
-      <button
-        onclick={() =>
-          apply(
-            fixture
-              .configureCanvas({ envBasePath: '/missing-fixture-hdr/' })
-              .then(() =>
-                fixture.update({ control: 'props', lightType: 'env' })
-              )
-          )}>Demonstrate HDR asset failure</button
-      >
-      <button
-        onclick={() =>
-          apply(fixture.update({ control: 'props', lightType: '3d' }))}
-        >Return to ambient lighting</button
-      >
-      {#if nativeError}<p role="alert" data-testid="native-error">
-          {nativeError}
-        </p>{/if}
-      <p>
-        Resource counters observe only attached resources; unobservable pass,
-        target and mirror-copy metrics are reported as null, never assumed zero.
-        They do not certify GPU-memory release.
-      </p>
-    </section>
-    <section aria-labelledby="mirror-heading" data-testid="mirror-demo">
-      <h2 id="mirror-heading">One producer, three aspect-ratio mirrors</h2>
-      <p>
-        Views mount first. Add the producer to show its final frame, including
-        grain, through three centered-cover 2D copies. These decorative,
-        noninteractive mirrors share one camera, not three independent scenes.
-        The fourth view has its own independent handle and producer. Last
-        visible consumer release frees the source GPU; reentry creates a fresh
-        generation with the configured time.
-      </p>
-      <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin:1rem 0">
-        <button
-          data-testid="mirror-toggle-source"
-          onclick={() =>
-            mirrorApi.configureSource('main', {
-              mounted: !mirrorTrees.main.mounted,
-            })}
-        >
-          {mirrorTrees.main.mounted ? 'Remove' : 'Add late'} mirror producer
-        </button>
-        <button
-          onclick={() =>
-            mirrorApi.configureSource('main', {
-              gradient: {
-                animate:
-                  mirrorTrees.main.gradient.animate === 'on' ? 'off' : 'on',
-              },
-            })}
-        >
-          {mirrorTrees.main.gradient.animate === 'on' ? 'Pause' : 'Animate'} mirror
-          source
-        </button>
-        <button
-          onclick={() => {
-            for (const id of ['square', 'wide', 'tall'] as MirrorViewId[])
-              void mirrorApi.configureView(id, { visible: false })
-          }}>Move main mirrors offscreen</button
-        >
-        <button
-          onclick={() => {
-            for (const id of ['square', 'wide', 'tall'] as MirrorViewId[])
-              void mirrorApi.configureView(id, { visible: true })
-          }}>Return main mirrors</button
-        >
-        <button
-          disabled={!mirrorTrees.main.mounted}
-          onclick={() => mirrorApi.setDuplicate(!mirrorDuplicate)}
-        >
-          {mirrorDuplicate ? 'Remove' : 'Attempt'} duplicate producer
-        </button>
-      </div>
-      <div
-        style="display:flex;flex-wrap:wrap;gap:1rem;align-items:center;min-height:216px"
-      >
-        {#each mirrorViewIds as id (id)}
-          {@const config = mirrorViews[id]}
-          {#if config.mounted}
-            <div
-              data-testid={`mirror-view-${id}`}
-              {@attach (node) => observeMirror(node, id)}
-              style={`width:${config.width}px;height:${config.height}px;flex:none;background:#283044;${config.visible ? '' : 'position:fixed;right:calc(100vw + 1px);top:0;'}`}
-            >
-              <ShaderGradientView
-                source={mirrorHandles[config.source]}
-                pixelDensity={config.pixelDensity}
-                maxDimension={config.maxDimension}
+          {#if secondMounted}
+            <div class="independent-surface" data-testid="independent-a">
+              <ShaderGradientCanvas
                 style="width:100%;height:100%"
-                onError={recordMirrorError}
+                class="independent-gradient"
+                aria-hidden={false}
+                role="img"
+                aria-label="Independent teal gradient"
               >
-                {#snippet fallback(state)}
-                  <span style="display:block;padding:0.5rem"
-                    >{id} · {state.status}</span
+                <ShaderGradient
+                  color1={secondColor}
+                  color2="#3647d6"
+                  color3="#eee2fa"
+                  animate="off"
+                  grain="off"
+                />
+                {#snippet fallback(state)}<div
+                    class="fallback"
+                    data-independent-fallback={state.status}
                   >
-                {/snippet}
-              </ShaderGradientView>
+                    Independent gradient · {state.status}
+                    {#if state.error}<span role="alert"
+                        >{state.error.message}</span
+                      >{/if}
+                  </div>{/snippet}
+              </ShaderGradientCanvas>
             </div>
           {/if}
-        {/each}
-      </div>
-      <p data-testid="mirror-source-status">
-        {#each mirrorSourceIds as id (id)}
-          {@const state = mirrorHandles[id].state}
-          <span
-            >{id}: {state.status} · generation {state.generation}
-            {#if state.error}<span role="alert">
-                · {state.error.code}: {state.error.message}</span
-              >{/if}
-          </span>
-        {/each}
-      </p>
-      {#each mirrorTreeIds as tree (tree)}
-        {@const config = mirrorTrees[tree]}
-        {#if config.mounted}
-          <svelte:boundary
-            onerror={(cause) =>
-              mirrorErrors.push(mirrorError(cause, 'mirror-source-boundary'))}
+        </div>
+      </section>
+
+      <section class="studio-section" aria-labelledby="host-heading">
+        <div class="studio-section-heading">
+          <div>
+            <p class="studio-eyebrow">03 / Host composition</p>
+            <h2 id="host-heading">A guest in your scene.</h2>
+          </div>
+          <p class="studio-copy">
+            The host supplies its camera, environment and white cube. External
+            gradients join that native Threlte tree without taking it over.
+            Clear the gradients and watch the host objects and renderer remain.
+          </p>
+        </div>
+        <div class="studio-actions">
+          <button
+            class="studio-button"
+            onclick={() =>
+              apply(
+                fixture.externalHost.configure({
+                  enabled: true,
+                  gradients: [
+                    {
+                      shader: 'defaults',
+                      type: 'plane',
+                      animate: 'off',
+                      positionX: -2,
+                      rotationZ: 0,
+                      color1: '#fd7454',
+                    },
+                    {
+                      shader: 'cosmic',
+                      type: 'sphere',
+                      animate: 'off',
+                      positionX: 2,
+                      rotationZ: 0,
+                      color1: '#65c4ff',
+                    },
+                  ],
+                })
+              )}>Mount two external gradients</button
           >
+          <button
+            class="studio-button-secondary"
+            onclick={() => apply(fixture.externalHost.clear())}
+            >Clear external gradients, retain host</button
+          >
+          <button
+            class="studio-button-secondary"
+            onclick={() =>
+              apply(
+                fixture.externalHost.configure({
+                  enabled: false,
+                  gradients: [],
+                })
+              )}>Destroy host Canvas</button
+          >
+        </div>
+        {#if clientMounted && external.enabled}
+          <svelte:boundary
+            onerror={(error) =>
+              observer.error(
+                {
+                  code: 'renderer',
+                  message:
+                    error instanceof Error ? error.message : String(error),
+                  cause: error,
+                },
+                'host'
+              )}
+          >
+            <div class="host-canvas" data-testid="external-host">
+              <Canvas renderMode="on-demand"
+                ><HostScene {observer} gradients={external.gradients} /></Canvas
+              >
+            </div>
+            {#snippet failed(error)}<p class="studio-error" role="alert">
+                The host Canvas could not start: {error instanceof Error
+                  ? error.message
+                  : String(error)}
+              </p>{/snippet}
+          </svelte:boundary>
+        {:else}
+          <div class="host-empty studio-note">
+            <strong>A host, waiting for its guests.</strong>
+            <p>
+              Mount two external gradients to create the host Canvas with its
+              own white cube. Clear keeps the host; Destroy releases the
+              complete host tree.
+            </p>
+          </div>
+        {/if}
+      </section>
+
+      <section class="studio-section" aria-labelledby="fallback-heading">
+        <div class="studio-section-heading">
+          <div>
+            <p class="studio-eyebrow">04 / Honest failure</p>
+            <h2 id="fallback-heading">
+              The light can fail. The page shouldn't.
+            </h2>
+          </div>
+        </div>
+        <p class="studio-copy">
+          Fallbacks preserve useful content when WebGL is unavailable. This
+          button deliberately points the native environment loader at a
+          nonexistent local asset directory, so its real typed error can be
+          observed without replacing the page.
+        </p>
+        <div class="studio-actions">
+          <button
+            class="studio-button-secondary"
+            onclick={() =>
+              apply(
+                fixture
+                  .configureCanvas({ envBasePath: '/missing-fixture-hdr/' })
+                  .then(() => setControl({ lightType: 'env' }))
+              )}>Demonstrate HDR asset failure</button
+          >
+          <button
+            class="studio-button-secondary"
+            onclick={() => apply(setControl({ lightType: '3d' }))}
+            >Return to ambient lighting</button
+          >
+        </div>
+        {#if nativeError}<p
+            class="studio-error"
+            role="alert"
+            data-testid="native-error"
+          >
+            {nativeError}
+          </p>{/if}
+        <p>
+          Resource counters observe only attached resources; unobservable pass,
+          target and mirror-copy metrics are reported as null, never assumed
+          zero. They do not certify GPU-memory release.
+        </p>
+      </section>
+      <section
+        class="studio-section"
+        aria-labelledby="mirror-heading"
+        data-testid="mirror-demo"
+      >
+        <div class="studio-section-heading">
+          <div>
+            <p class="studio-eyebrow">05 / Source → View</p>
+            <h2 id="mirror-heading">One light. Many frames.</h2>
+          </div>
+        </div>
+        <p class="studio-copy">
+          Views mount first. Add the producer to show its final frame, including
+          grain, through three centered-cover 2D copies. These decorative,
+          noninteractive mirrors share one camera, not three independent scenes.
+          The fourth view has its own independent handle and producer. Last
+          visible consumer release frees the source GPU; reentry creates a fresh
+          generation with the configured time.
+        </p>
+        <div class="studio-actions mirror-actions">
+          <button
+            class="studio-button"
+            data-testid="mirror-toggle-source"
+            onclick={() =>
+              mirrorApi.configureSource('main', {
+                mounted: !mirrorTrees.main.mounted,
+              })}
+          >
+            {mirrorTrees.main.mounted ? 'Remove' : 'Add late'} mirror producer
+          </button>
+          <button
+            onclick={() =>
+              mirrorApi.configureSource('main', {
+                gradient: {
+                  animate:
+                    mirrorTrees.main.gradient.animate === 'on' ? 'off' : 'on',
+                },
+              })}
+          >
+            {mirrorTrees.main.gradient.animate === 'on' ? 'Pause' : 'Animate'} mirror
+            source
+          </button>
+          <button
+            onclick={() => {
+              for (const id of ['square', 'wide', 'tall'] as MirrorViewId[])
+                void mirrorApi.configureView(id, { visible: false })
+            }}>Move main mirrors offscreen</button
+          >
+          <button
+            onclick={() => {
+              for (const id of ['square', 'wide', 'tall'] as MirrorViewId[])
+                void mirrorApi.configureView(id, { visible: true })
+            }}>Return main mirrors</button
+          >
+          <button
+            disabled={!mirrorTrees.main.mounted}
+            onclick={() => mirrorApi.setDuplicate(!mirrorDuplicate)}
+          >
+            {mirrorDuplicate ? 'Remove' : 'Attempt'} duplicate producer
+          </button>
+        </div>
+        <div
+          class="mirror-views"
+          aria-label="Live Source and View aspect-ratio study"
+        >
+          {#each mirrorViewIds as id (id)}
+            {@const config = mirrorViews[id]}
+            {#if config.mounted}
+              <div
+                class="mirror-surface"
+                data-testid={`mirror-view-${id}`}
+                {@attach (node) => observeMirror(node, id)}
+                style={`width:${config.width}px;height:${config.height}px;flex:none;background:#283044;${config.visible ? '' : 'position:fixed;right:calc(100vw + 1px);top:0;'}`}
+              >
+                <ShaderGradientView
+                  source={mirrorHandles[config.source]}
+                  pixelDensity={config.pixelDensity}
+                  maxDimension={config.maxDimension}
+                  style="width:100%;height:100%"
+                  onError={recordMirrorError}
+                >
+                  {#snippet fallback(state)}
+                    <span class="mirror-fallback"
+                      >{id} · {state.status}
+                      {#if state.error}<span role="alert"
+                          >{state.error.message}</span
+                        >{/if}</span
+                    >
+                  {/snippet}
+                </ShaderGradientView>
+              </div>
+            {/if}
+          {/each}
+        </div>
+        <p class="mirror-status studio-note" data-testid="mirror-source-status">
+          {#each mirrorSourceIds as id (id)}
+            {@const state = mirrorHandles[id].state}
+            <span
+              >{id}: {state.status} · generation {state.generation}
+              {#if state.error}<span role="alert">
+                  · {state.error.code}: {state.error.message}</span
+                >{/if}
+            </span>
+          {/each}
+        </p>
+        {#each mirrorTreeIds as tree (tree)}
+          {@const config = mirrorTrees[tree]}
+          {#if config.mounted}
+            <svelte:boundary
+              onerror={(cause) =>
+                mirrorErrors.push(mirrorError(cause, 'mirror-source-boundary'))}
+            >
+              <ShaderGradientSource
+                data-testid={`mirror-source-${tree}`}
+                source={mirrorHandles[config.source]}
+                gradient={config.gradient}
+                canvas={config.canvas}
+                width={config.width}
+                height={config.height}
+                pixelDensity={config.pixelDensity}
+                maxDimension={config.maxDimension}
+                onError={recordMirrorError}
+              />
+              {#snippet failed(error)}
+                <p role="alert">
+                  Mirror {tree} producer: {mirrorError(
+                    error,
+                    'mirror-source-boundary'
+                  ).code} · {mirrorError(error, 'mirror-source-boundary')
+                    .message}
+                </p>
+              {/snippet}
+            </svelte:boundary>
+          {/if}
+        {/each}
+        {#if mirrorDuplicate && mirrorTrees.main.mounted}
+          {@const attempt = createMirrorDuplicateAttempt()}
+          <svelte:boundary onerror={attempt.boundary}>
             <ShaderGradientSource
-              data-testid={`mirror-source-${tree}`}
-              source={mirrorHandles[config.source]}
-              gradient={config.gradient}
-              canvas={config.canvas}
-              width={config.width}
-              height={config.height}
-              pixelDensity={config.pixelDensity}
-              maxDimension={config.maxDimension}
-              onError={recordMirrorError}
+              data-testid="mirror-duplicate"
+              source={mirrorHandles[mirrorTrees.main.source]}
+              gradient={mirrorTrees.main.gradient}
+              onError={attempt.onError}
             />
             {#snippet failed(error)}
-              <p role="alert">
-                Mirror {tree} producer: {mirrorError(
-                  error,
-                  'mirror-source-boundary'
-                ).code} · {mirrorError(error, 'mirror-source-boundary').message}
+              {@const failure = attempt.failure(error)}
+              <p role="alert" data-testid="mirror-duplicate-error">
+                {failure.code}: {failure.message}
+                The original producer and independent tree remain owned by their callers.
               </p>
             {/snippet}
           </svelte:boundary>
         {/if}
-      {/each}
-      {#if mirrorDuplicate && mirrorTrees.main.mounted}
-        {@const attempt = createMirrorDuplicateAttempt()}
-        <svelte:boundary onerror={attempt.boundary}>
-          <ShaderGradientSource
-            data-testid="mirror-duplicate"
-            source={mirrorHandles[mirrorTrees.main.source]}
-            gradient={mirrorTrees.main.gradient}
-            onError={attempt.onError}
-          />
-          {#snippet failed(error)}
-            {@const failure = attempt.failure(error)}
-            <p role="alert" data-testid="mirror-duplicate-error">
-              {failure.code}: {failure.message}
-              The original producer and independent tree remain owned by their callers.
-            </p>
-          {/snippet}
-        </svelte:boundary>
-      {/if}
-      <details>
-        <summary>Mirror source, rebind, resolution and view controls</summary>
-        <div
-          style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-start;margin-top:1rem"
-        >
-          {#each mirrorTreeIds as tree (tree)}
-            {@const config = mirrorTrees[tree]}
-            <fieldset style="display:grid;gap:0.5rem;max-width:22rem">
-              <legend>Mirror {tree} source</legend>
-              <label
-                ><input
-                  type="checkbox"
-                  checked={config.mounted}
-                  onchange={(event) =>
-                    mirrorApi.configureSource(tree, {
-                      mounted: event.currentTarget.checked,
-                    })}
-                /> Mounted</label
-              >
-              <label
-                >Mirror {tree} producer handle
-                <select
-                  value={config.source}
-                  onchange={(event) =>
-                    mirrorApi.configureSource(tree, {
-                      source: event.currentTarget.value as MirrorSourceId,
-                    })}
-                >
-                  {#each mirrorSourceIds as id (id)}<option value={id}
-                      >{id}</option
-                    >{/each}
-                </select>
-              </label>
-              <label
-                >Mirror {tree} preset
-                <select
-                  onchange={(event) =>
-                    mirrorApi.configureSource(tree, {
-                      gradient: {
-                        ...presets[event.currentTarget.value as PresetName]
-                          .props,
-                        control: 'props',
-                        urlString: '',
-                        lightType: '3d',
-                        animate: 'off',
-                        enableTransition: false,
-                        zoomOut: false,
-                      },
-                    })}
-                >
-                  {#each Object.keys(presets) as name (name)}<option
-                      value={name}
-                      selected={name === (tree === 'main' ? 'halo' : 'sunset')}
-                      >{name}</option
-                    >{/each}
-                </select>
-              </label>
-              <label
-                >Mirror {tree} color<input
-                  type="color"
-                  value={config.gradient.color1}
-                  oninput={(event) =>
-                    mirrorApi.configureSource(tree, {
-                      gradient: { color1: event.currentTarget.value },
-                    })}
-                /></label
-              >
-              <label
-                >Mirror {tree} time<input
-                  type="number"
-                  step="0.5"
-                  value={config.gradient.uTime}
-                  oninput={(event) =>
-                    mirrorApi.configureSource(tree, {
-                      gradient: { uTime: event.currentTarget.valueAsNumber },
-                    })}
-                /></label
-              >
-              <label
-                >Mirror {tree} grain<select
-                  value={config.gradient.grain}
-                  onchange={(event) =>
-                    mirrorApi.configureSource(tree, {
-                      gradient: {
-                        grain: event.currentTarget.value as 'on' | 'off',
-                      },
-                    })}><option>on</option><option>off</option></select
-                ></label
-              >
-              <label
-                >Mirror {tree} lighting<select
-                  value={config.gradient.lightType}
-                  onchange={(event) =>
-                    mirrorApi.configureSource(tree, {
-                      gradient: {
-                        lightType: event.currentTarget.value as '3d' | 'env',
-                      },
-                    })}><option>3d</option><option>env</option></select
-                ></label
-              >
-              <label
-                >Mirror {tree} HDR base<input
-                  value={config.canvas.envBasePath ?? ''}
-                  placeholder="Default remote HDR manifest"
-                  onchange={(event) =>
-                    mirrorApi.configureSource(tree, {
-                      canvas: {
-                        envBasePath: event.currentTarget.value || undefined,
-                      },
-                    })}
-                /></label
-              >
-              <label
-                >Mirror {tree} field of view<input
-                  type="number"
-                  value={config.canvas.fov}
-                  oninput={(event) =>
-                    mirrorApi.configureSource(tree, {
-                      canvas: { fov: event.currentTarget.valueAsNumber },
-                    })}
-                /></label
-              >
-              {#each ['width', 'height', 'pixelDensity', 'maxDimension'] as field (field)}
+        <details class="mirror-controls">
+          <summary>Mirror source, rebind, resolution and view controls</summary>
+          <div class="mirror-control-grid">
+            {#each mirrorTreeIds as tree (tree)}
+              {@const config = mirrorTrees[tree]}
+              <fieldset class="mirror-control-group">
+                <legend>Mirror {tree} source</legend>
                 <label
-                  >Mirror {tree}
-                  {field}<input
-                    type="number"
-                    step="any"
-                    value={config[field as 'width']}
+                  ><input
+                    type="checkbox"
+                    checked={config.mounted}
+                    onchange={(event) =>
+                      mirrorApi.configureSource(tree, {
+                        mounted: event.currentTarget.checked,
+                      })}
+                  /> Mounted</label
+                >
+                <label
+                  >Mirror {tree} producer handle
+                  <select
+                    value={config.source}
+                    onchange={(event) =>
+                      mirrorApi.configureSource(tree, {
+                        source: event.currentTarget.value as MirrorSourceId,
+                      })}
+                  >
+                    {#each mirrorSourceIds as id (id)}<option value={id}
+                        >{id}</option
+                      >{/each}
+                  </select>
+                </label>
+                <label
+                  >Mirror {tree} preset
+                  <select
+                    onchange={(event) =>
+                      mirrorApi.configureSource(tree, {
+                        gradient: {
+                          ...presets[event.currentTarget.value as PresetName]
+                            .props,
+                          control: 'props',
+                          urlString: '',
+                          lightType: '3d',
+                          animate: 'off',
+                          enableTransition: false,
+                          zoomOut: false,
+                        },
+                      })}
+                  >
+                    {#each Object.keys(presets) as name (name)}<option
+                        value={name}
+                        selected={name ===
+                          (tree === 'main' ? 'halo' : 'sunset')}>{name}</option
+                      >{/each}
+                  </select>
+                </label>
+                <label
+                  >Mirror {tree} color<input
+                    type="color"
+                    value={config.gradient.color1}
                     oninput={(event) =>
                       mirrorApi.configureSource(tree, {
-                        [field]: event.currentTarget.valueAsNumber,
+                        gradient: { color1: event.currentTarget.value },
                       })}
                   /></label
                 >
-              {/each}
-            </fieldset>
-          {/each}
-          {#each mirrorViewIds as id (id)}
-            {@const config = mirrorViews[id]}
-            <fieldset style="display:grid;gap:0.5rem;max-width:22rem">
-              <legend>Mirror {id} view</legend>
-              <label
-                ><input
-                  type="checkbox"
-                  checked={config.mounted}
-                  onchange={(event) =>
-                    mirrorApi.configureView(id, {
-                      mounted: event.currentTarget.checked,
-                    })}
-                /> Mounted</label
-              >
-              <label
-                ><input
-                  type="checkbox"
-                  checked={config.visible}
-                  onchange={(event) =>
-                    mirrorApi.configureView(id, {
-                      visible: event.currentTarget.checked,
-                    })}
-                /> Place in document (not offscreen)</label
-              >
-              <label
-                >Mirror {id} view handle<select
-                  value={config.source}
-                  onchange={(event) =>
-                    mirrorApi.configureView(id, {
-                      source: event.currentTarget.value as MirrorSourceId,
-                    })}
-                >
-                  {#each mirrorSourceIds as source (source)}<option
-                      value={source}>{source}</option
-                    >{/each}
-                </select></label
-              >
-              {#each ['width', 'height', 'pixelDensity', 'maxDimension'] as field (field)}
                 <label
-                  >Mirror {id}
-                  {field}<input
+                  >Mirror {tree} time<input
                     type="number"
-                    step="any"
-                    value={config[field as 'width']}
+                    step="0.5"
+                    value={config.gradient.uTime}
                     oninput={(event) =>
-                      mirrorApi.configureView(id, {
-                        [field]: event.currentTarget.valueAsNumber,
+                      mirrorApi.configureSource(tree, {
+                        gradient: { uTime: event.currentTarget.valueAsNumber },
                       })}
                   /></label
                 >
-              {/each}
-            </fieldset>
-          {/each}
-        </div>
-      </details>
-      <p>
-        Frame, copy and pixel observations are pull-only development fixtures,
-        not per-frame UI. Unobservable GPU allocation/disposal metrics stay
-        null; observed WebGL identities and actual context-loss status are not
-        GPU-memory certificates.
-      </p>
-    </section>
-    <footer>
-      <p>
-        Native package imports only. No request-global settings, server graphics
-        construction, or page-wide client-only replacement.
-      </p>
-    </footer>
+                <label
+                  >Mirror {tree} grain<select
+                    value={config.gradient.grain}
+                    onchange={(event) =>
+                      mirrorApi.configureSource(tree, {
+                        gradient: {
+                          grain: event.currentTarget.value as 'on' | 'off',
+                        },
+                      })}><option>on</option><option>off</option></select
+                  ></label
+                >
+                <label
+                  >Mirror {tree} lighting<select
+                    value={config.gradient.lightType}
+                    onchange={(event) =>
+                      mirrorApi.configureSource(tree, {
+                        gradient: {
+                          lightType: event.currentTarget.value as '3d' | 'env',
+                        },
+                      })}><option>3d</option><option>env</option></select
+                  ></label
+                >
+                <label
+                  >Mirror {tree} HDR base<input
+                    value={config.canvas.envBasePath ?? ''}
+                    placeholder="Default remote HDR manifest"
+                    onchange={(event) =>
+                      mirrorApi.configureSource(tree, {
+                        canvas: {
+                          envBasePath: event.currentTarget.value || undefined,
+                        },
+                      })}
+                  /></label
+                >
+                <label
+                  >Mirror {tree} field of view<input
+                    type="number"
+                    value={config.canvas.fov}
+                    oninput={(event) =>
+                      mirrorApi.configureSource(tree, {
+                        canvas: { fov: event.currentTarget.valueAsNumber },
+                      })}
+                  /></label
+                >
+                {#each ['width', 'height', 'pixelDensity', 'maxDimension'] as field (field)}
+                  <label
+                    >Mirror {tree}
+                    {field}<input
+                      type="number"
+                      step="any"
+                      value={config[field as 'width']}
+                      oninput={(event) =>
+                        mirrorApi.configureSource(tree, {
+                          [field]: event.currentTarget.valueAsNumber,
+                        })}
+                    /></label
+                  >
+                {/each}
+              </fieldset>
+            {/each}
+            {#each mirrorViewIds as id (id)}
+              {@const config = mirrorViews[id]}
+              <fieldset class="mirror-control-group">
+                <legend>Mirror {id} view</legend>
+                <label
+                  ><input
+                    type="checkbox"
+                    checked={config.mounted}
+                    onchange={(event) =>
+                      mirrorApi.configureView(id, {
+                        mounted: event.currentTarget.checked,
+                      })}
+                  /> Mounted</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    checked={config.visible}
+                    onchange={(event) =>
+                      mirrorApi.configureView(id, {
+                        visible: event.currentTarget.checked,
+                      })}
+                  /> Place in document (not offscreen)</label
+                >
+                <label
+                  >Mirror {id} view handle<select
+                    value={config.source}
+                    onchange={(event) =>
+                      mirrorApi.configureView(id, {
+                        source: event.currentTarget.value as MirrorSourceId,
+                      })}
+                  >
+                    {#each mirrorSourceIds as source (source)}<option
+                        value={source}>{source}</option
+                      >{/each}
+                  </select></label
+                >
+                {#each ['width', 'height', 'pixelDensity', 'maxDimension'] as field (field)}
+                  <label
+                    >Mirror {id}
+                    {field}<input
+                      type="number"
+                      step="any"
+                      value={config[field as 'width']}
+                      oninput={(event) =>
+                        mirrorApi.configureView(id, {
+                          [field]: event.currentTarget.valueAsNumber,
+                        })}
+                    /></label
+                  >
+                {/each}
+              </fieldset>
+            {/each}
+          </div>
+        </details>
+        <p>
+          Frame, copy and pixel observations are pull-only development fixtures,
+          not per-frame UI. Unobservable GPU allocation/disposal metrics stay
+          null; observed WebGL identities and actual context-loss status are not
+          GPU-memory certificates.
+        </p>
+      </section>
+      <footer class="studio-footer">
+        <p>
+          Native package imports only. No request-global settings, server
+          graphics construction, or page-wide client-only replacement.
+        </p>
+      </footer>
+    </div>
   {/if}
 </main>
 
 <style>
-  :global(body) {
-    margin: 0;
-    font:
-      16px/1.6 system-ui,
-      sans-serif;
-    background: #111521;
-    color: #eff2ff;
+  .kit-studio {
+    --studio-accent: #e5b98b;
   }
-  :global(*) {
-    box-sizing: border-box;
+  .kit-studio h1,
+  .kit-studio h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 400;
+    letter-spacing: -0.035em;
   }
-  main {
-    max-width: 72rem;
-    margin: auto;
-    padding: 2rem 1.25rem 4rem;
-  }
-  h1 {
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1.15;
-  }
-  h2 {
-    line-height: 1.25;
-  }
-  .eyebrow {
-    color: #b5bfff;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-size: 0.8rem;
-  }
-  nav,
-  .controls {
+  .request-strip {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.8rem;
     align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #364047;
   }
-  a {
-    color: #adcaff;
+  .request-strip p {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin: 0;
+    font-size: 0.85rem;
+    color: #b9c1bf;
   }
-  section {
-    margin-top: 2.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid #333b53;
+  .request-strip strong {
+    color: #f1dfca;
   }
-  label {
+  .request-strip nav {
+    font-size: 0.85rem;
+  }
+  .request-strip a {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    min-height: 44px;
   }
-  button,
-  select,
-  input {
-    font: inherit;
-  }
-  button,
-  select {
-    padding: 0.4rem 0.65rem;
-    border-radius: 0.4rem;
-    border: 1px solid #8590b5;
-    background: #252d44;
-    color: #fff;
-  }
-  button {
-    cursor: pointer;
-  }
-  :global(:focus-visible) {
-    outline: 3px solid #ffd17e;
-    outline-offset: 3px;
-  }
-  .managed-placement {
+  .kit-studio .managed-placement {
     width: 100%;
-    height: 360px;
-    margin-top: 1rem;
+    min-height: 0;
+    height: clamp(440px, 49vw, 620px);
+    background: #242827;
   }
   .managed-placement.offscreen {
     position: fixed;
@@ -1683,18 +1992,183 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 0.8rem;
     padding: 1.5rem;
     text-align: center;
-    background: linear-gradient(125deg, #623449, #29304c 55%, #274b54);
+    background: linear-gradient(140deg, #45342e, #282b2e 55%, #263d3c);
+    color: #f3ece1;
+  }
+  .fallback > span:last-child,
+  .empty-scene > span {
+    max-width: 26rem;
+    color: #ccc6bf;
+    font-size: 0.9rem;
+  }
+  .fallback-mark {
+    font-size: 4rem;
+    line-height: 1;
+    color: #e5b98b;
+  }
+  .control-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  .palette-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+  .palette-row label {
+    font-size: 0.75rem;
+  }
+  output {
+    color: #e5b98b;
+    font-variant-numeric: tabular-nums;
+  }
+  .lifecycle-actions,
+  .mirror-actions {
+    margin-top: 1.25rem;
+  }
+  .chapter-number {
+    font-family: Georgia, serif;
+    font-size: 2.5rem;
+    color: #e5b98b;
+  }
+  .independent-study {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.55fr) minmax(0, 1fr);
+    overflow: hidden;
+  }
+  .independent-tools {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+  }
+  .independent-surface {
+    min-width: 0;
+    height: 300px;
   }
   .host-canvas {
     width: 100%;
-    height: 300px;
+    height: 380px;
     background: #20283d;
     margin-top: 1rem;
+    border: 1px solid #3c4646;
+    border-radius: 1rem;
+    overflow: hidden;
   }
-  footer {
-    margin-top: 3rem;
-    color: #c3cae3;
+  .host-empty {
+    margin-top: 1rem;
+    padding: 2rem;
+  }
+  .host-empty p {
+    max-width: 42rem;
+    margin-bottom: 0;
+  }
+  .mirror-views {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    min-height: 260px;
+    padding: 1.5rem 0;
+  }
+  .mirror-surface {
+    max-width: 100%;
+    outline: 1px solid #64716c;
+    outline-offset: 5px;
+    border-radius: 0.25rem;
+  }
+  .mirror-fallback {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.8rem;
+    color: #e8e3dd;
+  }
+  .mirror-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .mirror-controls {
+    margin-top: 1.5rem;
+  }
+  .mirror-control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .mirror-control-group {
+    display: grid;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+  .mirror-control-grid label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+  }
+  .mirror-control-grid input:not([type='checkbox']),
+  .mirror-control-grid select {
+    width: 100%;
+    min-width: 0;
+  }
+  @media (max-width: 600px) {
+    .kit-studio .page-story {
+      gap: 12px;
+      padding: 20px 0 8px;
+    }
+    .request-strip {
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+    }
+    .request-strip nav {
+      gap: 0 12px;
+    }
+    .kit-studio .managed-study {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      margin-top: 8px;
+      padding-top: 16px;
+    }
+    .kit-studio .managed-heading {
+      display: contents;
+    }
+    .managed-heading > div {
+      grid-row: 1;
+      margin-bottom: 12px;
+    }
+    .managed-heading h2 {
+      margin-bottom: 0;
+    }
+    .managed-heading .managed-description {
+      grid-row: 3;
+      margin: 16px 0 0;
+    }
+    .managed-workspace {
+      grid-row: 2;
+    }
+    .kit-studio .managed-placement {
+      height: 380px;
+    }
+    .independent-study {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .host-canvas {
+      height: 320px;
+    }
   }
 </style>

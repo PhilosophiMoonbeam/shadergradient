@@ -1,0 +1,228 @@
+html,
+body {
+  margin: 0;
+  min-width: 0;
+  background: #101713;
+}
+
+.react-color-studio {
+  --studio-accent: #efba91;
+  color-scheme: dark;
+}
+
+.react-color-studio .react-brand-divider {
+  padding: 0 0.45rem;
+  color: #758477;
+}
+
+.react-color-studio .react-accent {
+  color: #efba91;
+}
+
+.react-color-studio .react-scene-panel {
+  min-width: 0;
+  align-self: start;
+  overflow: hidden;
+}
+
+.react-color-studio fieldset {
+  display: grid;
+  gap: 14px;
+}
+
+.react-color-studio .react-preview {
+  height: clamp(440px, 64vh, 680px);
+  background: #202223;
+}
+
+.react-color-studio .react-preview > div:first-child {
+  width: 100%;
+  height: 100%;
+}
+
+.react-color-studio .react-status {
+  flex: 0 1 auto;
+  border: 1px solid #4a584e;
+  border-radius: 999px;
+  padding: 0.45rem 0.65rem;
+  color: #d4dfd1;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.react-color-studio .react-status[data-status='ready'] {
+  border-color: #637b63;
+  color: #c9e5bd;
+}
+
+.react-color-studio .react-status[data-status='error'] {
+  border-color: #b3695e;
+  color: #ffd7cb;
+}
+
+.react-color-studio .react-scene-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #1b231feb;
+  text-align: center;
+}
+
+.react-color-studio .react-scene-overlay p {
+  display: grid;
+  gap: 0.8rem;
+  max-width: 31rem;
+  margin: 0;
+  color: #e0e9dd;
+}
+
+.react-color-studio .react-scene-overlay strong {
+  color: #fff5e8;
+  font-size: 1.25rem;
+}
+
+.react-color-studio .react-preview-caption {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.4rem;
+  width: auto;
+  height: auto;
+  pointer-events: none;
+}
+
+.react-color-studio .react-preview-caption span {
+  padding: 0.4rem 0.65rem;
+  border: 1px solid #ffffff30;
+  border-radius: 999px;
+  background: #172019dc;
+  color: #f6f4eb;
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+}
+
+.react-color-studio .react-observe {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid #344137;
+  color: #d1d9cd;
+  line-height: 1.65;
+}
+
+.react-color-studio .react-observe > p:last-child {
+  margin-bottom: 0;
+}
+
+.react-color-studio .react-palette-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.react-color-studio .react-palette-button {
+  display: grid;
+  gap: 0.4rem;
+  width: 100%;
+  height: auto;
+  min-height: 70px;
+  padding: 0.5rem;
+  border: 1px solid #536455;
+  border-radius: 0.6rem;
+  background: #19231c;
+  color: #e5eade;
+  text-align: left;
+  font-size: 0.75rem;
+}
+
+.react-color-studio .react-palette-button[aria-pressed='true'] {
+  border-color: #efba91;
+  box-shadow: inset 0 0 0 1px #efba91;
+}
+
+.react-color-studio .react-palette-strip {
+  display: flex;
+  overflow: hidden;
+  height: 22px;
+  border-radius: 0.25rem;
+}
+
+.react-color-studio .react-palette-strip i {
+  flex: 1;
+}
+
+.react-color-studio .react-color-inputs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.react-color-studio .react-color-inputs input {
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  padding: 0.2rem;
+  cursor: pointer;
+}
+
+.react-color-studio .react-color-value {
+  font-size: 0.68rem;
+  color: #b8c8b6;
+  font-variant-numeric: tabular-nums;
+}
+
+.react-color-studio output {
+  float: right;
+  color: #efc19c;
+  font-variant-numeric: tabular-nums;
+}
+
+.react-color-studio .react-camera-controls {
+  margin-bottom: 1.25rem;
+  border: 1px solid #435446;
+  border-radius: 0.65rem;
+  background: #18221b;
+}
+
+.react-color-studio .react-camera-controls summary {
+  min-height: 48px;
+  padding: 0.85rem 1rem;
+  color: #e7eddf;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.react-color-studio .react-camera-controls fieldset {
+  border: 0;
+  margin: 0;
+}
+
+.react-color-studio .react-step {
+  color: #edb98e;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+
+@media (max-width: 600px) {
+  .react-color-studio .react-preview {
+    height: 420px;
+  }
+
+  .react-color-studio .react-status {
+    white-space: normal;
+    max-width: 8rem;
+  }
+
+  .react-color-studio .react-observe {
+    padding: 1rem;
+  }
+}

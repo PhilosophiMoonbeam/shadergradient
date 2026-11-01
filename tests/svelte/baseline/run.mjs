@@ -449,10 +449,10 @@ try {
       row.observation = { pixels: inspectPixels(bytes), title: await page.title(), finalURL: page.url(), backend }
       await artifact(row, 'consumer-canvas', 'png', bytes)
       if (scenario.navigation) {
-        await page.getByRole('link', { name: 'Away', exact: true }).click()
+        await page.locator('a[href="/away"]').first().click()
         await page.waitForURL(/\/away$/)
         if (await page.locator('canvas').count()) throw new Error('Canvas retained on away page')
-        await page.getByRole('link', { name: 'Back to gradient' }).click()
+        await page.locator('a[href="/"]').first().click()
         await page.locator('canvas').first().waitFor({ state: 'visible' })
         row.observation.navigation = 'away canvas removed; back canvas recreated'
       }

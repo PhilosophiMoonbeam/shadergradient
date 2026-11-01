@@ -1,215 +1,442 @@
+@import '../../demo-studio.css';
+
 :root {
-  font-family: Inter, system-ui, sans-serif;
-  color: #e8e8f0;
-  background: #11121a;
-  font-synthesis: none;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: #e7eee9;
+  background: #101615;
   color-scheme: dark;
+  font-synthesis: none;
 }
-* {
-  box-sizing: border-box;
-}
+
 body {
   margin: 0;
 }
-main {
-  max-width: 1440px;
-  padding: clamp(1rem, 3vw, 3rem);
-  margin: auto;
+
+.native-studio {
+  --studio-accent: #b8d8c9;
 }
-header {
-  max-width: 850px;
+
+.native-studio .native-section-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-top: 1.5rem;
 }
-h1 {
-  font-size: clamp(2rem, 5vw, 4rem);
-  margin: 0.5rem 0 1rem;
-  line-height: 1.05;
+
+.native-studio .native-section-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #c0d9cb;
+  font-size: 0.82rem;
+  text-underline-offset: 0.3em;
 }
-h2 {
-  margin-top: 0;
+
+.native-studio .native-main-section {
+  margin: 2rem 0 0;
 }
-p {
-  line-height: 1.6;
-  color: #c4c6d6;
+
+.native-studio .native-main-panel {
+  min-width: 0;
+  align-self: start;
 }
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.75rem;
-  color: #c8b4ff;
+
+.native-studio .native-mode-label {
+  color: #b0c1b7;
+  font: 0.72rem ui-monospace, monospace;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
-section {
-  margin: 2rem 0;
-  padding: 1.25rem;
-  border: 1px solid #383a4a;
-  border-radius: 1rem;
-  background: #191b26;
-}
-.preview-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
-  gap: 1.25rem;
-}
-.preview {
+
+.native-studio .preview {
   position: relative;
   width: 100%;
-  height: 440px;
+  height: 560px;
+  min-height: 0;
   overflow: hidden;
-  background: #252736;
-  border-radius: 0.6rem;
+  background: #1e2a29;
 }
-.preview.offscreen {
+
+/* Fixture visibility moves the real sized wrapper, not a synthetic state flag. */
+.native-studio .preview.offscreen {
   position: fixed;
   left: -20000px;
   top: 0;
   width: 640px;
 }
-.lifecycle-controls {
+
+.native-studio .native-preview-caption {
   display: grid;
-  align-content: start;
-  gap: 0.7rem;
+  gap: 0.75rem;
 }
-.controls-grid {
+
+.native-studio .native-preview-caption p {
+  margin: 0;
+  max-width: 65ch;
+}
+
+.native-studio .native-preview-caption > span {
+  color: #b8d8c9;
+  font-size: 0.75rem;
+}
+
+.native-studio .native-preview-caption output {
+  display: block;
+  color: #a8bab1;
+  font: 0.7rem/1.6 ui-monospace, monospace;
+  overflow-wrap: anywhere;
+}
+
+.native-studio .native-material-controls {
+  padding: 1.25rem;
+  border: 1px solid #33433d;
+  border-radius: 1.2rem;
+  background: #17211d;
+}
+
+.native-studio .native-material-controls fieldset {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1rem;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  border: 0;
 }
-fieldset {
+
+.native-studio .native-material-controls legend {
+  margin-bottom: 1.15rem;
+  padding: 0;
+  font-size: 0.95rem;
+}
+
+.native-studio .native-material-controls label:not(:has([type='checkbox'])) {
+  display: grid;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+}
+
+.native-studio .native-material-controls select,
+.native-studio .native-material-controls textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.native-studio .native-palette {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.native-studio .native-palette input[type='color'] {
+  width: 100%;
+  height: 44px;
+  padding: 0.2rem;
+  cursor: pointer;
+}
+
+.native-studio .native-control-note {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.65;
+  color: #acbcb2;
+}
+
+.native-studio .native-query-controls {
+  padding-top: 0.25rem;
+  border-top: 1px solid #33433d;
+}
+
+.native-studio .native-query-controls label,
+.native-studio .native-query-controls p {
+  margin-top: 0.85rem;
+}
+
+.native-studio .native-query-controls p {
+  font-size: 0.74rem;
+}
+
+.native-studio .native-advanced-controls,
+.native-studio .native-mirror-controls {
+  padding: 0.25rem 1.2rem;
+  border: 1px solid #33433d;
+  border-radius: 1rem;
+  background: #151e1a;
+}
+
+.native-studio summary {
+  min-height: 44px;
+  padding: 0.85rem 0;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #dbe9df;
+}
+
+.native-studio .native-advanced-controls summary span {
+  display: block;
+  color: #98afa1;
+  font-size: 0.73rem;
+  padding-left: 1.1rem;
+}
+
+.native-studio .controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.native-studio .controls-grid fieldset,
+.native-studio .native-mirror-controls fieldset {
   display: grid;
   align-content: start;
-  gap: 0.8rem;
+  gap: 0.85rem;
   min-width: 0;
-  border: 1px solid #44465c;
-  border-radius: 0.6rem;
+  margin: 0;
+  border: 1px solid #34443b;
+  border-radius: 0.8rem;
   padding: 1rem;
 }
-legend {
-  font-weight: 650;
-  padding: 0 0.4rem;
+
+.native-studio .controls-grid legend,
+.native-studio .native-mirror-controls legend {
+  padding: 0 0.35rem;
+  color: #c5ddce;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
-label {
+
+.native-studio label {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.8rem;
-  font-size: 0.9rem;
-}
-label:has(textarea) {
-  display: grid;
-}
-input,
-select,
-textarea,
-button {
-  font: inherit;
-  border: 1px solid #64667b;
-  border-radius: 0.35rem;
-  background: #222432;
-  color: #fff;
-  padding: 0.45rem;
-}
-input[type='number'] {
-  width: 90px;
-}
-input[type='checkbox'] {
-  accent-color: #c8b4ff;
-  width: 1.1rem;
-  height: 1.1rem;
-  flex-shrink: 0;
-}
-input[type='color'] {
-  width: 60px;
-  height: 36px;
-  padding: 0.15rem;
-}
-input[type='range'] {
-  flex: 1;
-}
-input:not([type]),
-input[type='text'] {
   min-width: 0;
-  width: 55%;
-}
-select {
-  max-width: 65%;
-}
-textarea {
-  width: 100%;
-  resize: vertical;
-}
-button {
-  cursor: pointer;
-  padding: 0.65rem 0.9rem;
-  background: #39324e;
-}
-button:disabled {
-  cursor: default;
-  opacity: 0.5;
-}
-:focus-visible {
-  outline: 3px solid #d9c6ff;
-  outline-offset: 3px;
-}
-.button-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin: 1rem 0;
-}
-output {
-  font:
-    0.8rem ui-monospace,
-    monospace;
-  word-break: break-all;
+  font-size: 0.8rem;
   line-height: 1.5;
 }
-.independent-grid {
+
+.native-studio label:has([type='checkbox']) {
+  justify-content: flex-start;
+  min-height: 44px;
+}
+
+.native-studio input[type='checkbox'] {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  accent-color: #b8d8c9;
+}
+
+.native-studio input[type='number'] {
+  width: 96px;
+  flex: none;
+}
+
+.native-studio input:not([type]),
+.native-studio input[type='text'],
+.native-studio select {
+  min-width: 0;
+  max-width: 58%;
+}
+
+.native-studio input[type='range'] {
+  min-width: 0;
+  flex: 1;
+}
+
+.native-studio textarea {
+  resize: vertical;
+}
+
+.native-studio fieldset p {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.65;
+}
+
+.native-studio .native-inline-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 2rem;
+  margin: 1.5rem 0;
+}
+
+.native-studio .native-inline-controls label {
+  min-height: 44px;
+}
+
+.native-studio .independent-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
-  margin-top: 1rem;
 }
-.small-preview {
-  height: 250px;
-  position: relative;
+
+.native-studio .native-instance,
+.native-studio .native-mirror-card {
+  min-width: 0;
+  margin: 0;
+}
+
+.native-studio .native-instance {
   overflow: hidden;
-  border-radius: 0.6rem;
+  border: 1px solid #34443b;
+  border-radius: 1rem;
+  background: #17221d;
 }
-.host-preview {
+
+.native-studio .small-preview {
+  position: relative;
+  height: 250px;
+  overflow: hidden;
+}
+
+.native-studio figcaption {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.8rem;
+  padding: 0.85rem 1rem;
+  color: #c8dccf;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.native-studio figcaption span:last-child {
+  color: #96ad9d;
+}
+
+.native-studio .native-card-index {
+  color: #a5cbb4;
+  font: 0.7rem/1.5 ui-monospace, monospace;
+}
+
+.native-studio .native-capability-cards {
+  margin: 1.5rem 0;
+}
+
+.native-studio .button-row,
+.native-studio .native-mirror-actions {
+  margin: 1.5rem 0;
+}
+
+.native-studio .host-preview {
   position: relative;
   height: 360px;
   margin-top: 1rem;
-  background: #22293b;
+  background: #202b2f;
   overflow: hidden;
-  border-radius: 0.6rem;
+  border: 1px solid #3b4b43;
+  border-radius: 1rem;
 }
-.fallback {
+
+.native-studio .fallback {
   height: 100%;
   display: grid;
   align-content: center;
   justify-items: center;
   padding: 1.5rem;
   text-align: center;
-  background: #222432;
+  background: #1b2924;
 }
-details p,
-fieldset p {
-  font-size: 0.8rem;
-  margin: 0.3rem 0;
+
+.native-studio .native-mirror-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  min-height: 216px;
+  padding: 1.25rem 0;
 }
-summary {
-  cursor: pointer;
+
+.native-studio .native-mirror-card {
+  flex: none;
 }
-footer {
-  font-size: 0.8rem;
-  color: #b1b3c9;
-  line-height: 1.6;
+
+/* Keep the actual oracle surfaces at their exact configured pixel dimensions. */
+.native-studio .native-mirror-surface {
+  overflow: hidden;
+  outline: 1px solid #435c4d;
 }
-@media (max-width: 800px) {
-  .preview-layout,
-  .independent-grid {
-    grid-template-columns: 1fr;
+
+.native-studio .native-mirror-card figcaption {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem 0;
+}
+
+.native-studio .native-source-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0 1.5rem;
+  font: 0.72rem/1.6 ui-monospace, monospace;
+}
+
+.native-studio .native-source-status > span {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #34483c;
+  border-radius: 0.5rem;
+  background: #18271e;
+}
+
+.native-studio .native-observation-note {
+  max-width: 95ch;
+  color: #9ab2a3;
+  font-size: 0.76rem;
+}
+
+.native-studio [role='alert'] {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .native-studio .preview {
+    height: 440px;
   }
-  .preview {
+
+  .native-studio .native-material-controls {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .native-studio .preview {
     height: 360px;
+  }
+
+  .native-studio .independent-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .native-studio .native-inline-controls {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .native-studio .controls-grid label:not(:has([type='checkbox'])),
+  .native-studio .native-mirror-controls label:not(:has([type='checkbox'])) {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .native-studio .controls-grid input:not([type='checkbox']),
+  .native-studio .controls-grid select,
+  .native-studio .native-mirror-controls input:not([type='checkbox']),
+  .native-studio .native-mirror-controls select {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .native-studio .native-mirror-controls fieldset {
+    width: 100%;
+    max-width: 100% !important;
+  }
+
+  .native-studio .native-mirror-controls,
+  .native-studio .native-advanced-controls {
+    padding-inline: 0.75rem;
   }
 }

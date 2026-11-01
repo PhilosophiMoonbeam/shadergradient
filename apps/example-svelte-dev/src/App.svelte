@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount, tick } from 'svelte'
   import { Canvas } from '@threlte/core'
+  import { Mesh, MeshPhysicalMaterial } from 'three'
   import {
     ShaderGradient,
     ShaderGradientCanvas,
@@ -26,6 +27,8 @@
   import Fallback from './Fallback.svelte'
   import BindingRegression from './BindingRegression.svelte'
   import { bindingMode } from './binding-probe'
+  import GlassStudyScene from './GlassStudyScene.svelte'
+  import { demoSearchParams, patchDemoSearchParams } from '../../demo-query'
   const selectedBindingMode =
     typeof window === 'undefined' ? null : bindingMode(window.location.search)
   // Explicit handles belong to this component/request, never a module registry.
@@ -778,10 +781,21 @@
   let independentMounted = $state(true)
   let visiblePlacement = $state(true)
   let wrapper = $state.raw<HTMLElement>()
-  let selectedPreset = $state<PresetName>('halo')
+  let selectedPreset = $state<PresetName | 'glass-study'>('halo')
   let cameraOutput = $state.raw<CameraUpdate>()
   let errorOutput = $state('')
   let prefersReducedMotion = $state(false)
+  const effectiveAnimate = $derived.by(() => {
+    if (settings.control === 'query') {
+      const animate = demoSearchParams(settings.urlString).get('animate')
+      if (animate === 'on' || animate === 'off') return animate
+    }
+    return settings.animate === 'off' ? 'off' : 'on'
+  })
+  const motionPaused = $derived(
+    effectiveAnimate === 'off' ||
+      (canvasConfig.respectReducedMotion !== false && prefersReducedMotion)
+  )
   let external = $state.raw<FixtureExternalConfig>({
     enabled: true,
     gradients: [
@@ -845,6 +859,46 @@
     setExternal: (value) => {
       external = value
     },
+  })
+  let presentationProbe: Parameters<typeof controller.attach>[1] | undefined
+  let presentationAlive = true
+  let effectiveVariant = $state<string | null>(null)
+  const effectiveShader = $derived(effectiveVariant?.split(':')[0])
+  // Observe the actual resolved material through the existing probe boundary.
+  // No query parser, polling, render task or per-frame snapshot allocation.
+  const presentationController: typeof controller = {
+    ...controller,
+    attach(channel, probe) {
+      if (presentationAlive && channel === 'main') {
+        presentationProbe = probe
+        effectiveVariant = null
+      }
+      const release = controller.attach(channel, probe)
+      return () => {
+        if (presentationAlive && presentationProbe === probe) {
+          presentationProbe = undefined
+          effectiveVariant = null
+        }
+        release()
+      }
+    },
+    notify() {
+      const mesh = presentationAlive
+        ? presentationProbe?.scene.getObjectByName('shadergradient-mesh')
+        : undefined
+      if (
+        mesh instanceof Mesh &&
+        mesh.material instanceof MeshPhysicalMaterial
+      ) {
+        const variant = mesh.material.customProgramCacheKey()
+        if (variant !== effectiveVariant) effectiveVariant = variant
+      }
+      controller.notify()
+    },
+  }
+  onDestroy(() => {
+    presentationAlive = false
+    presentationProbe = undefined
   })
   const numericGroups: {
     title: string
@@ -927,6 +981,39 @@
       fov: presets[name].props.fov,
     }
   }
+  function applyGlassStudy() {
+    applyPreset('halo')
+    selectedPreset = 'glass-study'
+    update({
+      shader: 'glass',
+      type: 'sphere',
+      lightType: 'env',
+      envPreset: 'city',
+      animate: 'off',
+      grain: 'off',
+      uTime: 2,
+      uStrength: 0.18,
+      uDensity: 1.1,
+      uFrequency: 2,
+      uAmplitude: 0.2,
+      reflection: 0.94,
+      brightness: 1.2,
+      color1: '#f5fbff',
+      color2: '#e3f0ff',
+      color3: '#fff2e6',
+      positionX: 0,
+      positionY: 0,
+      positionZ: 0,
+      rotationX: 0,
+      rotationY: 0,
+      rotationZ: 0,
+      cAzimuthAngle: 0,
+      cPolarAngle: 90,
+      cDistance: 4.8,
+      cameraZoom: 1,
+    })
+    canvasConfig.fov = 45
+  }
   function reportError(error: GradientError) {
     errorOutput = `${error.code}: ${error.message}`
     controller.error(error)
@@ -1005,384 +1092,562 @@
   })
 </script>
 
-<svelte:head
-  ><title>Native ShaderGradient · Svelte playground</title></svelte:head
->
-<main>
+<svelte:head>
+  <title>Native Composition Studio · ShaderGradient / Svelte</title>
+  <meta
+    name="description"
+    content="Explore native Svelte gradients, independent Threlte scenes, host ownership and completed-frame Source/View composition."
+  />
+</svelte:head>
+<main class="demo-studio studio-shell native-studio">
   {#if selectedBindingMode}
     <BindingRegression mode={selectedBindingMode} />
   {:else}
-    <header>
-      <p class="eyebrow">
-        Public @shadergradient/svelte · Svelte 5 / Threlte 8
-      </p>
-      <h1>Native gradient playground</h1>
-      <p>
-        A dimensioned, decorative gradient by default. Enable pointer
-        interaction deliberately; every control also works with a keyboard.
-      </p>
+    <header class="studio-header">
+      <a class="studio-brand" href="#composition"
+        >ShaderGradient <span>/ Native</span></a
+      >
+      <span class="studio-badge">Svelte 5 · Threlte 8</span>
     </header>
-    <section aria-labelledby="preview-title">
-      <h2 id="preview-title">Managed gradient</h2>
-      <div class="preview-layout">
-        <div
-          class="preview"
-          class:offscreen={!visiblePlacement}
-          bind:this={wrapper}
-          data-testid="gradient-wrapper"
-        >
-          {#if mounted}
-            <ShaderGradientCanvas
-              {...canvasConfig}
-              data-gradient-main
-              style="width:100%;height:100%;"
-              onError={reportError}
+    <div class="studio-intro" id="composition">
+      <p class="studio-eyebrow">Native Composition Studio / 01</p>
+      <h1>One scene.<br />Many possibilities.</h1>
+      <p class="studio-lede">
+        Shape a living material, compose it inside your own Threlte scene, or
+        share one completed frame across a family of views. Native Svelte,
+        without a React bridge.
+      </p>
+      <nav class="native-section-nav" aria-label="Composition studies">
+        <a href="#preview-title">Material studio</a>
+        <a href="#independent-title">Independent scenes</a>
+        <a href="#host-title">Host composition</a>
+        <a href="#mirror-heading">Source / View</a>
+      </nav>
+    </div>
+    <section class="native-main-section" aria-labelledby="preview-title">
+      <div class="studio-workspace">
+        <div class="studio-panel native-main-panel">
+          <div class="studio-panel-header">
+            <div>
+              <p class="studio-eyebrow">Live material</p>
+              <h2 id="preview-title">Your native canvas</h2>
+            </div>
+            <span class="native-mode-label"
+              >{effectiveVariant
+                ? effectiveVariant.replace(':', ' / ')
+                : 'Waiting for native material'}</span
             >
-              {#snippet fallback(state)}<Fallback
-                  {state}
-                  {controller}
-                />{/snippet}
-              <SceneProbe {controller} channel="main" />
-              <ShaderGradient
-                {...settings}
-                onCameraUpdate={cameraUpdate}
+          </div>
+          <div
+            class="preview studio-preview"
+            class:offscreen={!visiblePlacement}
+            bind:this={wrapper}
+            data-testid="gradient-wrapper"
+          >
+            {#if mounted}
+              <ShaderGradientCanvas
+                {...canvasConfig}
+                data-gradient-main
+                style="width:100%;height:100%;"
                 onError={reportError}
-              />
-            </ShaderGradientCanvas>
-          {:else}<p>
-              Managed Canvas unmounted. Independent and host scenes remain
-              available.
-            </p>{/if}
-        </div>
-        <div class="lifecycle-controls">
-          <label
-            ><input type="checkbox" bind:checked={mounted} /> Mount managed Canvas</label
-          >
-          <label
-            ><input type="checkbox" bind:checked={visiblePlacement} /> Place managed
-            preview in viewport</label
-          >
-          <label
-            ><input type="checkbox" bind:checked={canvasConfig.lazyLoad} /> Lazy mount
-            while visible</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              bind:checked={canvasConfig.respectReducedMotion}
-            /> Respect real reduced-motion preference</label
-          >
-          <label
-            >Pointer behavior<select bind:value={canvasConfig.pointerEvents}
-              ><option value="none">Decorative (none)</option><option
-                value="auto">Interactive (auto)</option
-              ></select
-            ></label
-          >
-          <label
-            >Pixel density<input
-              type="number"
-              min="0.25"
-              max="3"
-              step="0.25"
-              bind:value={canvasConfig.pixelDensity}
-            /></label
-          >
-          <label
-            >Field of view<input
-              type="number"
-              min="1"
-              max="179"
-              step="1"
-              bind:value={canvasConfig.fov}
-            /></label
-          >
-          <label
-            >Intersection threshold<input
-              type="number"
-              min="0"
-              max="1"
-              step="0.1"
-              bind:value={canvasConfig.threshold}
-            /></label
-          >
-          <label
-            >Intersection root margin<input
-              bind:value={canvasConfig.rootMargin}
-            /></label
-          >
-          <details>
-            <summary
-              >Renderer construction options (explicit recreation)</summary
-            >
+              >
+                {#snippet fallback(state)}<Fallback
+                    {state}
+                    {controller}
+                  />{/snippet}
+                <SceneProbe
+                  controller={presentationController}
+                  channel="main"
+                />
+                {#if effectiveShader === 'glass'}
+                  <GlassStudyScene />
+                {/if}
+                <ShaderGradient
+                  {...settings}
+                  onCameraUpdate={cameraUpdate}
+                  onError={reportError}
+                />
+              </ShaderGradientCanvas>
+            {:else}<p>
+                Managed Canvas unmounted. Independent and host scenes remain
+                available.
+              </p>{/if}
+          </div>
+          <div class="studio-panel-footer native-preview-caption">
             <p>
-              These options recreate the owned renderer. Ordinary visual, DPR
-              and FOV changes do not.
+              {#if effectiveShader === 'glass'}
+                Physical transmission through real opaque scene geometry. Load
+                the glass study for a front-facing sphere, a smooth surface and
+                HDR reflections. Plane and water-plane glass are sheets, not a
+                closed lens. The scene context is placed behind the front-facing
+                study, not behind every camera angle.
+              {:else}
+                A full native shader, not a video or CSS gradient. Explore the
+                palette, change the surface, then compose the result below.
+              {/if}
             </p>
+            <span
+              >{canvasConfig.pointerEvents === 'auto'
+                ? 'Pointer interaction enabled'
+                : 'Decorative · pointer-transparent'}</span
+            >
+            <output aria-label="Camera update"
+              >{cameraOutput
+                ? JSON.stringify(cameraOutput)
+                : 'Camera callback pending'}</output
+            >
+            {#if errorOutput}<p class="studio-error" role="alert">
+                Last reported error: {errorOutput}
+              </p>{/if}
+          </div>
+        </div>
+        <aside
+          class="studio-controls native-material-controls"
+          aria-label="Material controls"
+        >
+          <fieldset>
+            <legend>Preset &amp; material</legend>
+            <label
+              >Preset<select
+                value={selectedPreset}
+                onchange={(event) =>
+                  applyPreset(event.currentTarget.value as PresetName)}
+              >
+                <option value="glass-study" disabled
+                  >Custom · Glass study</option
+                >
+                {#each Object.entries(presets) as [name, preset] (name)}
+                  <option value={name}>{preset.title}</option>
+                {/each}
+              </select></label
+            >
+            <label
+              >Shader<select bind:value={settings.shader}
+                >{#each ['defaults', 'positionMix', 'cosmic', 'glass'] as shader (shader)}<option
+                    value={shader}>{shader}</option
+                  >{/each}</select
+              ></label
+            >
+            <label
+              >Geometry<select bind:value={settings.type}
+                ><option value="plane">Plane</option><option value="sphere"
+                  >Sphere</option
+                ><option value="waterPlane">Water plane</option></select
+              ></label
+            >
+            <div class="native-palette">
+              {#each ['color1', 'color2', 'color3'] as color (color)}<label
+                  >{color}<input
+                    type="color"
+                    value={String(settings[color as 'color1'])}
+                    oninput={(event) =>
+                      update({ [color]: event.currentTarget.value })}
+                  /></label
+                >{/each}
+            </div>
+            <div class="studio-actions">
+              <button
+                class="studio-button"
+                onclick={() => {
+                  const animate = motionPaused ? 'on' : 'off'
+                  if (settings.control === 'query') {
+                    update({
+                      urlString: patchDemoSearchParams(settings.urlString, {
+                        animate,
+                      }),
+                    })
+                  } else {
+                    update({ animate })
+                  }
+                  if (animate === 'on' && prefersReducedMotion)
+                    canvasConfig.respectReducedMotion = false
+                }}>{motionPaused ? 'Resume motion' : 'Pause motion'}</button
+              >
+              <button class="studio-button-secondary" onclick={applyGlassStudy}
+                >Load glass study</button
+              >
+            </div>
+            <p class="native-control-note">
+              10 Core presets · 4 shaders × 3 geometries. A preset restores its
+              complete settings; edits are your own composition.
+            </p>
+            {#if prefersReducedMotion && canvasConfig.respectReducedMotion !== false}
+              <p class="studio-note">
+                Reduced motion is active. Resume motion explicitly opts this
+                canvas into animation.
+              </p>
+            {/if}
+            <label
+              ><input type="checkbox" bind:checked={settings.wireframe} /> Wireframe</label
+            >
+            <details class="native-query-controls">
+              <summary>URL settings &amp; precedence</summary>
+              <label
+                >Control source<select bind:value={settings.control}
+                  ><option value="props">Explicit props</option><option
+                    value="query">Typed URL query overrides</option
+                  ></select
+                ></label
+              >
+              <label
+                >Query URL or search string<textarea
+                  rows="3"
+                  bind:value={settings.urlString}
+                  placeholder="?shader=cosmic&amp;uTime=4&amp;animate=off"
+                ></textarea></label
+              >
+              <p>
+                Precedence: halo → explicit props → recognized valid query
+                values. Switching presets restores explicit props mode.
+              </p>
+            </details>
+          </fieldset>
+        </aside>
+      </div>
+    </section>
+    <section class="studio-section" aria-labelledby="settings-title">
+      <div class="studio-section-heading">
+        <div>
+          <p class="studio-eyebrow">Fine-tune / 01.1</p>
+          <h2 id="settings-title">Make the material yours.</h2>
+        </div>
+        <p class="studio-copy">
+          Camera, lighting, time and lifecycle are real scene inputs. Paused
+          scenes still respond to deliberate edits and resizing. Renderer
+          construction options are separated because they recreate the owned
+          renderer.
+        </p>
+      </div>
+      <details class="native-advanced-controls">
+        <summary
+          >Open the complete control desk <span
+            >Surface · time · camera · HDR · lifecycle</span
+          ></summary
+        >
+        <div class="controls-grid">
+          <fieldset class="lifecycle-controls">
+            <legend>Canvas &amp; lifecycle</legend>
+            <label
+              ><input type="checkbox" bind:checked={mounted} /> Mount managed Canvas</label
+            >
+            <label
+              ><input type="checkbox" bind:checked={visiblePlacement} /> Place managed
+              preview in viewport</label
+            >
+            <label
+              ><input type="checkbox" bind:checked={canvasConfig.lazyLoad} /> Lazy
+              mount while visible</label
+            >
             <label
               ><input
                 type="checkbox"
-                bind:checked={canvasConfig.preserveDrawingBuffer}
-              /> Preserve drawing buffer</label
+                bind:checked={canvasConfig.respectReducedMotion}
+              /> Respect real reduced-motion preference</label
             >
             <label
-              >Power preference<select bind:value={canvasConfig.powerPreference}
-                ><option value="default">Default</option><option
-                  value="low-power">Low power</option
-                ><option value="high-performance">High performance</option
+              >Pointer behavior<select bind:value={canvasConfig.pointerEvents}
+                ><option value="none">Decorative (none)</option><option
+                  value="auto">Interactive (auto)</option
                 ></select
               ></label
             >
-          </details>
-          <output aria-label="Camera update"
-            >{cameraOutput
-              ? JSON.stringify(cameraOutput)
-              : 'Camera callback pending'}</output
-          >
-          {#if errorOutput}<p role="alert">{errorOutput}</p>{/if}
-        </div>
-      </div>
-    </section>
-    <section aria-labelledby="settings-title">
-      <h2 id="settings-title">Live settings</h2>
-      <div class="controls-grid">
-        <fieldset>
-          <legend>Preset, shader and geometry</legend>
-          <label
-            >Preset<select
-              value={selectedPreset}
-              onchange={(event) =>
-                applyPreset(event.currentTarget.value as PresetName)}
-              >{#each Object.entries(presets) as [name, preset] (name)}<option
-                  value={name}>{preset.title}</option
-                >{/each}</select
-            ></label
-          >
-          <label
-            >Shader<select bind:value={settings.shader}
-              >{#each ['defaults', 'positionMix', 'cosmic', 'glass'] as shader (shader)}<option
-                  value={shader}>{shader}</option
-                >{/each}</select
-            ></label
-          >
-          <label
-            >Geometry<select bind:value={settings.type}
-              ><option value="plane">Plane</option><option value="sphere"
-                >Sphere</option
-              ><option value="waterPlane">Water plane</option></select
-            ></label
-          >
-          {#each ['color1', 'color2', 'color3'] as color (color)}<label
-              >{color}<input
-                type="color"
-                value={String(settings[color as 'color1'])}
-                oninput={(event) =>
-                  update({ [color]: event.currentTarget.value })}
+            <label
+              >Pixel density<input
+                type="number"
+                min="0.25"
+                max="3"
+                step="0.25"
+                bind:value={canvasConfig.pixelDensity}
               /></label
-            >{/each}
-          <label
-            ><input type="checkbox" bind:checked={settings.wireframe} /> Wireframe</label
-          >
-          <label
-            >Control source<select bind:value={settings.control}
-              ><option value="props">Explicit props</option><option
-                value="query">Typed URL query overrides</option
-              ></select
-            ></label
-          >
-          <label
-            >Query URL or search string<textarea
-              rows="3"
-              bind:value={settings.urlString}
-              placeholder="?shader=cosmic&amp;uTime=4&amp;animate=off"
-            ></textarea></label
-          >
-          <p>
-            Precedence: halo → explicit props → recognized valid query values.
-            Switching presets restores explicit props mode.
-          </p>
-        </fieldset>
-        {#each numericGroups as group (group.title)}
-          <fieldset>
-            <legend>{group.title}</legend>
-            {#each group.fields as field (field.key)}
-              <label
-                >{field.label}<input
-                  type="number"
-                  value={Number(settings[field.key])}
-                  min={field.min}
-                  max={field.max}
-                  step={field.step}
-                  oninput={(event) => {
-                    if (Number.isFinite(event.currentTarget.valueAsNumber))
-                      update({ [field.key]: event.currentTarget.valueAsNumber })
-                  }}
-                /></label
+            >
+            <label
+              >Field of view<input
+                type="number"
+                min="1"
+                max="179"
+                step="1"
+                bind:value={canvasConfig.fov}
+              /></label
+            >
+            <label
+              >Intersection threshold<input
+                type="number"
+                min="0"
+                max="1"
+                step="0.1"
+                bind:value={canvasConfig.threshold}
+              /></label
+            >
+            <label
+              >Intersection root margin<input
+                bind:value={canvasConfig.rootMargin}
+              /></label
+            >
+            <details>
+              <summary
+                >Renderer construction options (explicit recreation)</summary
               >
-            {/each}
-            {#if group.title === 'Temporal controls'}
-              <label
-                >Animation<select bind:value={settings.animate}
-                  ><option value="on">Animate</option><option value="off"
-                    >Paused</option
-                  ></select
-                ></label
-              >
-              <label
-                >Range<select bind:value={settings.range}
-                  ><option value="disabled">Disabled</option><option
-                    value="enabled">Enabled</option
-                  ></select
-                ></label
-              >
-              <label
-                >Loop<select bind:value={settings.loop}
-                  ><option value="off">Off</option><option value="on"
-                    >On (takes precedence over range)</option
-                  ></select
-                ></label
-              >
-            {:else if group.title === 'Camera pose'}
+              <p>
+                These options recreate the owned renderer. Ordinary visual, DPR
+                and FOV changes do not.
+              </p>
               <label
                 ><input
                   type="checkbox"
-                  bind:checked={settings.enableTransition}
-                /> Smooth camera transitions</label
+                  bind:checked={canvasConfig.preserveDrawingBuffer}
+                /> Preserve drawing buffer</label
               >
               <label
-                ><input type="checkbox" bind:checked={settings.zoomOut} /> Zoom out
-                framing</label
+                >Power preference<select
+                  bind:value={canvasConfig.powerPreference}
+                  ><option value="default">Default</option><option
+                    value="low-power">Low power</option
+                  ><option value="high-performance">High performance</option
+                  ></select
+                ></label
               >
-            {/if}
+            </details>
           </fieldset>
-        {/each}
-        <fieldset>
-          <legend>Lighting, HDR and effects</legend>
-          <label
-            >Lighting<select bind:value={settings.lightType}
-              ><option value="3d">Ambient / 3D</option><option value="env"
-                >HDR environment</option
-              ></select
-            ></label
-          >
-          <label
-            >Brightness<input
-              type="number"
-              min="0"
-              step="0.1"
-              bind:value={settings.brightness}
-            /></label
-          >
-          <label
-            >HDR preset<select bind:value={settings.envPreset}
-              ><option value="city">City</option><option value="dawn"
-                >Dawn</option
-              ><option value="lobby">Lobby</option></select
-            ></label
-          >
-          <label
-            >HDR base path<input
-              bind:value={canvasConfig.envBasePath}
-              placeholder="Default remote asset manifest"
-            /></label
-          >
-          <button
-            onclick={() => {
-              canvasConfig.envBasePath = undefined
-            }}>Restore default HDR manifest base</button
-          >
-          <p>
-            For a real failure fallback, select HDR and set an unavailable base
-            URL; restore a valid base to recover.
-          </p>
-          <label
-            >Grain<select bind:value={settings.grain}
-              ><option value="on">On</option><option value="off">Off</option
-              ></select
-            ></label
-          >
-          <label
-            >Grain blending<input
-              type="number"
-              min="0"
-              max="1"
-              step="0.05"
-              bind:value={settings.grainBlending}
-            /></label
-          >
-          <label
-            ><input type="checkbox" bind:checked={settings.toggleAxis} /> Axes helper</label
-          >
-        </fieldset>
-      </div>
+          {#each numericGroups as group (group.title)}
+            <fieldset>
+              <legend>{group.title}</legend>
+              {#each group.fields as field (field.key)}
+                <label
+                  >{field.label}<input
+                    type="number"
+                    value={Number(settings[field.key])}
+                    min={field.min}
+                    max={field.max}
+                    step={field.step}
+                    oninput={(event) => {
+                      if (Number.isFinite(event.currentTarget.valueAsNumber))
+                        update({
+                          [field.key]: event.currentTarget.valueAsNumber,
+                        })
+                    }}
+                  /></label
+                >
+              {/each}
+              {#if group.title === 'Temporal controls'}
+                <label
+                  >Animation<select bind:value={settings.animate}
+                    ><option value="on">Animate</option><option value="off"
+                      >Paused</option
+                    ></select
+                  ></label
+                >
+                <label
+                  >Range<select bind:value={settings.range}
+                    ><option value="disabled">Disabled</option><option
+                      value="enabled">Enabled</option
+                    ></select
+                  ></label
+                >
+                <label
+                  >Loop<select bind:value={settings.loop}
+                    ><option value="off">Off</option><option value="on"
+                      >On (takes precedence over range)</option
+                    ></select
+                  ></label
+                >
+              {:else if group.title === 'Camera pose'}
+                <label
+                  ><input
+                    type="checkbox"
+                    bind:checked={settings.enableTransition}
+                  /> Smooth camera transitions</label
+                >
+                <label
+                  ><input type="checkbox" bind:checked={settings.zoomOut} /> Zoom
+                  out framing</label
+                >
+              {/if}
+            </fieldset>
+          {/each}
+          <fieldset>
+            <legend>Lighting, HDR and effects</legend>
+            <label
+              >Lighting<select bind:value={settings.lightType}
+                ><option value="3d">Ambient / 3D</option><option value="env"
+                  >HDR environment</option
+                ></select
+              ></label
+            >
+            <label
+              >Brightness<input
+                type="number"
+                min="0"
+                step="0.1"
+                bind:value={settings.brightness}
+              /></label
+            >
+            <label
+              >HDR preset<select bind:value={settings.envPreset}
+                ><option value="city">City</option><option value="dawn"
+                  >Dawn</option
+                ><option value="lobby">Lobby</option></select
+              ></label
+            >
+            <label
+              >HDR base path<input
+                bind:value={canvasConfig.envBasePath}
+                placeholder="Default remote asset manifest"
+              /></label
+            >
+            <button
+              onclick={() => {
+                canvasConfig.envBasePath = undefined
+              }}>Restore default HDR manifest base</button
+            >
+            <p>
+              For a real failure fallback, select HDR and set an unavailable
+              base URL; restore a valid base to recover.
+            </p>
+            <label
+              >Grain<select bind:value={settings.grain}
+                ><option value="on">On</option><option value="off">Off</option
+                ></select
+              ></label
+            >
+            <label
+              >Grain blending<input
+                type="number"
+                min="0"
+                max="1"
+                step="0.05"
+                bind:value={settings.grainBlending}
+              /></label
+            >
+            <label
+              ><input type="checkbox" bind:checked={settings.toggleAxis} /> Axes helper</label
+            >
+          </fieldset>
+        </div>
+      </details>
     </section>
-    <section aria-labelledby="independent-title">
-      <h2 id="independent-title">Independent native instances</h2>
-      <p>
-        Changing the left instance does not update the right instance or the
-        managed playground.
-      </p>
-      <label>
-        <input
-          type="checkbox"
-          data-testid="independent-canvases-toggle"
-          bind:checked={independentMounted}
-        />
-        Show independent canvases
-      </label>
-      <label
-        >Left instance color<input
-          type="color"
-          bind:value={independentColor}
-        /></label
-      >
-      <label
-        >Left instance seek<input
-          type="number"
-          step="0.5"
-          bind:value={independentTime}
-        /></label
-      >
+    <section class="studio-section" aria-labelledby="independent-title">
+      <div class="studio-section-heading">
+        <div>
+          <p class="studio-eyebrow">Independent scenes / 02</p>
+          <h2 id="independent-title">Together, not coupled.</h2>
+        </div>
+        <p class="studio-copy">
+          Two native canvases, two independent scenes and cameras. Change the
+          left material or seek its paused time: the right composition and your
+          main canvas keep their own settings.
+        </p>
+      </div>
+      <div class="native-inline-controls">
+        <label>
+          <input
+            type="checkbox"
+            data-testid="independent-canvases-toggle"
+            bind:checked={independentMounted}
+          />
+          Show independent canvases
+        </label>
+        <label
+          >Left instance color<input
+            type="color"
+            bind:value={independentColor}
+          /></label
+        >
+        <label
+          >Left instance seek<input
+            type="number"
+            step="0.5"
+            bind:value={independentTime}
+          /></label
+        >
+      </div>
       <div class="independent-grid">
         {#if independentMounted}
-          <div class="small-preview" data-testid="independent-a">
-            <ShaderGradientCanvas
-              pixelDensity={1}
-              lazyLoad={false}
-              style="width:100%;height:100%"
-              ><ShaderGradient
-                {...presets.mint.props}
-                grain="off"
-                animate="off"
-                color1={independentColor}
-                uTime={independentTime}
-              /></ShaderGradientCanvas
-            >
-          </div>
-          <div class="small-preview" data-testid="independent-b">
-            <ShaderGradientCanvas
-              pixelDensity={1}
-              lazyLoad={false}
-              style="width:100%;height:100%"
-              ><ShaderGradient
-                {...presets.sunset.props}
-                grain="off"
-                animate="off"
-                uTime={7}
-              /></ShaderGradientCanvas
-            >
-          </div>
+          <figure class="native-instance">
+            <div class="small-preview" data-testid="independent-a">
+              <ShaderGradientCanvas
+                pixelDensity={1}
+                lazyLoad={false}
+                style="width:100%;height:100%"
+                ><ShaderGradient
+                  {...presets.mint.props}
+                  grain="off"
+                  animate="off"
+                  color1={independentColor}
+                  uTime={independentTime}
+                /></ShaderGradientCanvas
+              >
+            </div>
+            <figcaption>
+              <span>Instance A / Mint</span><span>Your color &amp; time</span>
+            </figcaption>
+          </figure>
+          <figure class="native-instance">
+            <div class="small-preview" data-testid="independent-b">
+              <ShaderGradientCanvas
+                pixelDensity={1}
+                lazyLoad={false}
+                style="width:100%;height:100%"
+                ><ShaderGradient
+                  {...presets.sunset.props}
+                  grain="off"
+                  animate="off"
+                  uTime={7}
+                /></ShaderGradientCanvas
+              >
+            </div>
+            <figcaption>
+              <span>Instance B / Sunset</span><span
+                >Independent · paused at 7</span
+              >
+            </figcaption>
+          </figure>
+        {:else}
+          <p class="studio-note">
+            Independent canvases intentionally unmounted. Their controls and the
+            other studies remain available.
+          </p>
         {/if}
       </div>
     </section>
-    <section aria-labelledby="host-title">
-      <h2 id="host-title">Ordinary consumer-owned Threlte host</h2>
-      <p>
-        A real host camera, generated environment and gold box coexist with two
-        external native gradients. Removing gradients must not dispose or
-        replace host resources.
-      </p>
-      <div class="button-row">
+    <section class="studio-section" aria-labelledby="host-title">
+      <div class="studio-section-heading">
+        <div>
+          <p class="studio-eyebrow">Host composition / 03</p>
+          <h2 id="host-title">Your scene stays yours.</h2>
+        </div>
+        <p class="studio-copy">
+          A consumer-owned Threlte camera, generated environment and gold box
+          coexist with two external native gradients. Remove either gradient, or
+          both: the host resources must stay intact.
+        </p>
+      </div>
+      <div class="studio-cards native-capability-cards">
+        <article class="studio-card">
+          <span class="native-card-index">01 / Compose</span>
+          <h3>Bring your own Canvas.</h3>
+          <p>
+            External mode joins the existing Threlte tree instead of creating
+            another managed canvas.
+          </p>
+        </article>
+        <article class="studio-card">
+          <span class="native-card-index">02 / Keep ownership</span>
+          <h3>Remove only the gradient.</h3>
+          <p>
+            Clear the gradients below. The gold box, camera and environment
+            belong to the host, not to the shader.
+          </p>
+        </article>
+        <article class="studio-card">
+          <span class="native-card-index">03 / Reframe</span>
+          <h3>One real camera.</h3>
+          <p>
+            Orbit the host to reframe the box and both materials together. This
+            is scene composition, not a 2D mirror.
+          </p>
+        </article>
+      </div>
+      <div class="button-row studio-actions">
         <button
           onclick={() => {
             external = { ...external, gradients: external.gradients.slice(1) }
@@ -1465,17 +1730,31 @@
         {:else}<p>Host intentionally unmounted.</p>{/if}
       </div>
     </section>
-    <section aria-labelledby="mirror-heading" data-testid="mirror-demo">
-      <h2 id="mirror-heading">One producer, three aspect-ratio mirrors</h2>
-      <p>
-        Views mount first. Add the producer to show its final frame, including
-        grain, through three centered-cover 2D copies. These decorative,
-        noninteractive mirrors share one camera, not three independent scenes.
-        The fourth view has its own independent handle and producer. Last
-        visible consumer release frees the source GPU; reentry creates a fresh
-        generation with the configured time.
+    <section
+      class="studio-section"
+      aria-labelledby="mirror-heading"
+      data-testid="mirror-demo"
+    >
+      <div class="studio-section-heading">
+        <div>
+          <p class="studio-eyebrow">Source / View composition / 04</p>
+          <h2 id="mirror-heading">Render once. Frame it everywhere.</h2>
+        </div>
+        <p class="studio-copy">
+          The square, wide and tall views are centered-cover 2D copies of one
+          producer’s completed frame, including grain. They share a camera and
+          are not independent 3D perspectives. The fourth view uses its own
+          handle and producer.
+        </p>
+      </div>
+      <p class="studio-note">
+        Start with “Add late mirror producer”. The three waiting views connect
+        to handle A. The independent B view already has its own producer; C is
+        an explicit spare handle for rebinding. Releasing the last visible
+        consumer frees the source GPU; reentry creates a fresh generation at
+        configured time.
       </p>
-      <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin:1rem 0">
+      <div class="studio-actions native-mirror-actions">
         <button
           data-testid="mirror-toggle-source"
           onclick={() =>
@@ -1516,35 +1795,43 @@
           {mirrorDuplicate ? 'Remove' : 'Attempt'} duplicate producer
         </button>
       </div>
-      <div
-        style="display:flex;flex-wrap:wrap;gap:1rem;align-items:center;min-height:216px"
-      >
+      <div class="native-mirror-gallery">
         {#each mirrorViewIds as id (id)}
           {@const config = mirrorViews[id]}
           {#if config.mounted}
-            <div
-              data-testid={`mirror-view-${id}`}
-              {@attach (node) => observeMirror(node, id)}
-              style={`width:${config.width}px;height:${config.height}px;flex:none;background:#283044;${config.visible ? '' : 'position:fixed;right:calc(100vw + 1px);top:0;'}`}
-            >
-              <ShaderGradientView
-                source={mirrorHandles[config.source]}
-                pixelDensity={config.pixelDensity}
-                maxDimension={config.maxDimension}
-                style="width:100%;height:100%"
-                onError={recordMirrorError}
+            <figure class="native-mirror-card">
+              <div
+                class="native-mirror-surface"
+                data-testid={`mirror-view-${id}`}
+                {@attach (node) => observeMirror(node, id)}
+                style={`width:${config.width}px;height:${config.height}px;flex:none;background:#283044;${config.visible ? '' : 'position:fixed;right:calc(100vw + 1px);top:0;'}`}
               >
-                {#snippet fallback(state)}
-                  <span style="display:block;padding:0.5rem"
-                    >{id} · {state.status}</span
-                  >
-                {/snippet}
-              </ShaderGradientView>
-            </div>
+                <ShaderGradientView
+                  source={mirrorHandles[config.source]}
+                  pixelDensity={config.pixelDensity}
+                  maxDimension={config.maxDimension}
+                  style="width:100%;height:100%"
+                  onError={recordMirrorError}
+                >
+                  {#snippet fallback(state)}
+                    <span style="display:block;padding:0.5rem"
+                      >{id} · {state.status}</span
+                    >
+                  {/snippet}
+                </ShaderGradientView>
+              </div>
+              <figcaption>
+                <span
+                  >{id === 'independent'
+                    ? 'Independent scene'
+                    : `${id} / centered cover`}</span
+                ><span>Handle {config.source}</span>
+              </figcaption>
+            </figure>
           {/if}
         {/each}
       </div>
-      <p data-testid="mirror-source-status">
+      <p class="native-source-status" data-testid="mirror-source-status">
         {#each mirrorSourceIds as id (id)}
           {@const state = mirrorHandles[id].state}
           <span
@@ -1602,7 +1889,7 @@
           {/snippet}
         </svelte:boundary>
       {/if}
-      <details>
+      <details class="native-mirror-controls">
         <summary>Mirror source, rebind, resolution and view controls</summary>
         <div
           style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-start;margin-top:1rem"
@@ -1795,17 +2082,21 @@
           {/each}
         </div>
       </details>
-      <p>
+      <p class="native-observation-note">
         Frame, copy and pixel observations are pull-only development fixtures,
         not per-frame UI. Unobservable GPU allocation/disposal metrics stay
         null; observed WebGL identities and actual context-loss status are not
         GPU-memory certificates.
       </p>
     </section>
-    <footer>
-      Dev-only window.gradientFixture v1 observes actual public Threlte scenes
-      and completed render stages. Production fixture qualification can
-      explicitly opt in with VITE_GRADIENT_FIXTURE=1.
+    <footer class="studio-footer">
+      <p>Native Svelte 5 · Threlte 8 · public @shadergradient/svelte</p>
+      <p>
+        Dev-only <code>window.gradientFixture</code> v1 observes actual public
+        Threlte scenes and completed render stages. Production fixture
+        qualification can explicitly opt in with
+        <code>VITE_GRADIENT_FIXTURE=1</code>.
+      </p>
     </footer>
   {/if}
 </main>
